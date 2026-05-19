@@ -1,7 +1,10 @@
 import type { Watchlist, WatchlistItem } from '../types';
-import { watchlists as defaultWatchlists } from '../data/mockData';
 
 const STORAGE_KEY = 'xd-finance-watchlists';
+
+const EMPTY_DEFAULT: Watchlist[] = [
+  { id: 'main', name: 'My Watchlist', items: [] },
+];
 
 export function loadWatchlists(): Watchlist[] {
   try {
@@ -13,7 +16,7 @@ export function loadWatchlists(): Watchlist[] {
   } catch {
     // fall through to defaults
   }
-  return structuredClone(defaultWatchlists);
+  return structuredClone(EMPTY_DEFAULT);
 }
 
 export function saveWatchlists(watchlists: Watchlist[]): void {
