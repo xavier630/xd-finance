@@ -82,7 +82,7 @@ export default function Header() {
           <path d="M12 22c5.52 0 10-4.48 10-10H12v10z" fill="#EA4335" />
         </svg>
         <span className="gf-logo-text">
-          <span className="gf-logo-google">Google</span> Finance
+          <span className="gf-logo-google">XD</span> Finance
         </span>
       </Link>
 
