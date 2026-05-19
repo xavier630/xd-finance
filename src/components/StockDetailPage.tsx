@@ -5,11 +5,8 @@ import { useWatchlists } from '../context/WatchlistContext';
 import { useQuote, useCompanyInfo } from '../hooks/useStockData';
 import StockChart from './StockChart';
 import KeyStats from './KeyStats';
-import EarningsHistory from './EarningsHistory';
-import Financials from './Financials';
-import NewsSection from './NewsSection';
+import ClassicFinancials from './ClassicFinancials';
 import CompanyInfo from './CompanyInfo';
-import RelatedCompanies from './RelatedCompanies';
 
 const GOOGLE_FINANCE_EXCHANGE_MAP: Record<string, string> = {
   'NASDAQ': 'NASDAQ', 'NasdaqGS': 'NASDAQ', 'NasdaqGM': 'NASDAQ', 'NasdaqCM': 'NASDAQ',
@@ -59,7 +56,6 @@ export default function StockDetailPage() {
     );
   }
 
-  // Merge live profile data into stock
   const enrichedStock = {
     ...stock,
     beta: beta || stock.beta,
@@ -98,81 +94,76 @@ export default function StockDetailPage() {
   return (
     <div className="gf-stock-detail">
       <div className="gf-breadcrumb">
-        <Link to="/">Home</Link>
+        <Link to="/">HOME</Link>
         <span>&rsaquo;</span>
-        <span>
-          {stock.symbol} &middot; {stock.exchange}
-        </span>
+        <span>{stock.symbol} &middot; {stock.exchange}</span>
       </div>
 
       <div className="gf-detail-header">
         <div className="gf-detail-title">
           <h1 className="gf-detail-name">{stock.name}</h1>
-          <span className="gf-detail-symbol">
-            {stock.symbol} &middot; {stock.exchange}
-          </span>
         </div>
 
-        <div className="gf-detail-price-row">
-          <span className="gf-detail-price">{getCurrencySymbol(stock.currency)}{stock.price.toFixed(2)}</span>
-          <span className={`gf-detail-change ${isPositive ? 'gf-positive' : 'gf-negative'}`}>
-            {isPositive ? '+' : ''}
-            {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
-            {stock.changePercent.toFixed(2)}%)
-          </span>
+        <div className="gf-detail-actions">
+          <button
+            className={`gf-btn-follow ${isWatched ? 'following' : ''}`}
+            onClick={() => setShowWatchlistMenu(!showWatchlistMenu)}
+          >
+            {isWatched ? '\u2713 Following' : '+ Follow'}
+          </button>
           <a
             href={getGoogleFinanceUrl(stock.symbol, stock.exchange)}
             target="_blank"
             rel="noopener noreferrer"
-            className="gf-btn-google-finance"
+            className="gf-btn-share"
           >
             View on Google Finance
           </a>
-          <div className="gf-watchlist-btn-container">
-            <button
-              className={`gf-btn-watchlist ${isWatched ? 'watched' : ''}`}
-              onClick={() => setShowWatchlistMenu(!showWatchlistMenu)}
-            >
-              {isWatched ? '★ In Watchlist' : '☆ Add to Watchlist'}
-            </button>
-            {showWatchlistMenu && (
-              <div className="gf-watchlist-dropdown">
-                {watchlists.map((wl) => {
-                  const inThis = memberOf.includes(wl.id);
-                  return (
-                    <button
-                      key={wl.id}
-                      className={`gf-watchlist-dropdown-item ${inThis ? 'active' : ''}`}
-                      onClick={() => handleToggleWatchlist(wl.id)}
-                    >
-                      <span>{inThis ? '★' : '☆'}</span>
-                      <span>{wl.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="gf-detail-meta">
-          Closed: {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} &middot; {stock.currency} &middot; {stock.exchange}
+          {showWatchlistMenu && (
+            <div className="gf-watchlist-dropdown">
+              {watchlists.map((wl) => {
+                const inThis = memberOf.includes(wl.id);
+                return (
+                  <button
+                    key={wl.id}
+                    className={`gf-watchlist-dropdown-item ${inThis ? 'active' : ''}`}
+                    onClick={() => handleToggleWatchlist(wl.id)}
+                  >
+                    <span>{inThis ? '\u2605' : '\u2606'}</span>
+                    <span>{wl.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      <StockChart symbol={stock.symbol} currentPrice={stock.price} change={stock.change} currency={stock.currency} />
+      <div className="gf-detail-price-row">
+        <span className="gf-detail-price">{getCurrencySymbol(stock.currency)}{stock.price.toFixed(2)}</span>
+        <span className={`gf-detail-change-badge ${isPositive ? 'positive' : 'negative'}`}>
+          {isPositive ? '\u2191' : '\u2193'}{Math.abs(stock.changePercent).toFixed(2)}%
+        </span>
+        <span className={`gf-detail-change-abs ${isPositive ? 'gf-positive' : 'gf-negative'}`}>
+          {isPositive ? '+' : ''}{stock.change.toFixed(2)}
+        </span>
+      </div>
+      <div className="gf-detail-meta">
+        {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })} &middot; {stock.currency} &middot; {stock.exchange} &middot; Disclaimer
+      </div>
 
-      <KeyStats stock={enrichedStock} />
+      <div className="gf-classic-layout">
+        <div className="gf-classic-main">
+          <StockChart symbol={stock.symbol} currentPrice={stock.price} change={stock.change} currency={stock.currency} />
 
-      <EarningsHistory symbol={stock.symbol} />
+          <ClassicFinancials symbol={stock.symbol} />
+        </div>
 
-      <Financials symbol={stock.symbol} />
-
-      <CompanyInfo stock={enrichedStock} />
-
-      <RelatedCompanies symbol={stock.symbol} />
-
-      <NewsSection symbol={stock.symbol} />
+        <div className="gf-classic-sidebar">
+          <KeyStats stock={enrichedStock} />
+          <CompanyInfo stock={enrichedStock} />
+        </div>
+      </div>
     </div>
   );
 }

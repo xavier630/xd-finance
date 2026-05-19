@@ -116,6 +116,10 @@ app.get('/api/fundamentals/:symbol', async (req, res) => {
         'earningsTrend',
         'incomeStatementHistory',
         'incomeStatementHistoryQuarterly',
+        'balanceSheetHistory',
+        'balanceSheetHistoryQuarterly',
+        'cashflowStatementHistory',
+        'cashflowStatementHistoryQuarterly',
         'defaultKeyStatistics',
         'financialData',
       ],
@@ -144,6 +148,29 @@ app.get('/api/earnings/:symbol', async (req, res) => {
   } catch (err) {
     console.error(`Earnings error for ${symbol}:`, err);
     res.status(500).json({ error: `Failed to fetch earnings for ${symbol}` });
+  }
+});
+
+// GET /api/earnings-history/:symbol - Alpha Vantage deep earnings (10+ years, US stocks)
+app.get('/api/earnings-history/:symbol', async (req, res) => {
+  const { symbol } = req.params;
+  const cacheKey = `av-earnings:${symbol}`;
+  const cached = getCached(cacheKey);
+  if (cached) return res.json(cached);
+
+  const AV_KEY = process.env.ALPHA_VANTAGE_KEY || 'WSYRYDHT9SM586ZV';
+  try {
+    const url = `https://www.alphavantage.co/query?function=EARNINGS&symbol=${encodeURIComponent(symbol)}&apikey=${AV_KEY}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data['Note'] || data['Information']) {
+      return res.status(429).json({ error: 'Alpha Vantage rate limit reached' });
+    }
+    setCache(cacheKey, data, FUNDAMENTALS_TTL);
+    res.json(data);
+  } catch (err) {
+    console.error(`Alpha Vantage earnings error for ${symbol}:`, err);
+    res.status(500).json({ error: `Failed to fetch earnings history for ${symbol}` });
   }
 });
 

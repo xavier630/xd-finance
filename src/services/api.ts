@@ -115,6 +115,46 @@ export interface YahooFundamentals {
       costOfRevenue?: number;
     }>;
   };
+  balanceSheetHistory?: {
+    balanceSheetStatements: Array<{
+      endDate: string;
+      totalAssets: number;
+      totalLiab: number;
+      totalStockholderEquity: number;
+      cash?: number;
+      shortTermInvestments?: number;
+    }>;
+  };
+  balanceSheetHistoryQuarterly?: {
+    balanceSheetStatements: Array<{
+      endDate: string;
+      totalAssets: number;
+      totalLiab: number;
+      totalStockholderEquity: number;
+      cash?: number;
+      shortTermInvestments?: number;
+    }>;
+  };
+  cashflowStatementHistory?: {
+    cashflowStatements: Array<{
+      endDate: string;
+      totalCashFromOperatingActivities: number;
+      capitalExpenditures: number;
+      totalCashFromFinancingActivities: number;
+      totalCashFromInvestingActivities?: number;
+      changeInCash?: number;
+    }>;
+  };
+  cashflowStatementHistoryQuarterly?: {
+    cashflowStatements: Array<{
+      endDate: string;
+      totalCashFromOperatingActivities: number;
+      capitalExpenditures: number;
+      totalCashFromFinancingActivities: number;
+      totalCashFromInvestingActivities?: number;
+      changeInCash?: number;
+    }>;
+  };
   defaultKeyStatistics?: {
     beta?: number;
     trailingEps?: number;
@@ -130,6 +170,22 @@ export interface YahooFundamentals {
     operatingMargins?: number;
     profitMargins?: number;
   };
+}
+
+export interface AlphaVantageEarnings {
+  symbol: string;
+  annualEarnings?: Array<{
+    fiscalDateEnding: string;
+    reportedEPS: string;
+  }>;
+  quarterlyEarnings?: Array<{
+    fiscalDateEnding: string;
+    reportedDate: string;
+    reportedEPS: string;
+    estimatedEPS: string;
+    surprise: string;
+    surprisePercentage: string;
+  }>;
 }
 
 // ---------- API functions ----------
@@ -170,6 +226,12 @@ export async function searchSymbols(query: string): Promise<YahooSearchResult> {
 
 export async function getMarketIndices(): Promise<YahooQuote[]> {
   return fetchJson<YahooQuote[]>(`${API_BASE}/api/market-indices`);
+}
+
+export async function getEarningsHistory(symbol: string): Promise<AlphaVantageEarnings> {
+  return fetchJson<AlphaVantageEarnings>(
+    `${API_BASE}/api/earnings-history/${encodeURIComponent(symbol)}`
+  );
 }
 
 // ---------- Timeframe helpers ----------

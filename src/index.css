@@ -1159,3 +1159,687 @@ a:hover {
   color: var(--gf-text-tertiary);
   font-size: 14px;
 }
+
+/* ==========================================
+   CLASSIC MODE STYLES
+   ========================================== */
+
+/* Header mode toggle */
+.gf-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+  padding-left: 16px;
+}
+
+.gf-mode-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--gf-border);
+  border-radius: 20px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.gf-mode-active {
+  padding: 6px 16px;
+  background: var(--gf-bg-primary);
+  color: var(--gf-text-primary);
+  font-weight: 500;
+  border-right: 1px solid var(--gf-border);
+}
+
+.gf-mode-inactive {
+  padding: 6px 16px;
+  color: var(--gf-text-tertiary);
+  cursor: pointer;
+}
+
+/* Market navigation tabs */
+.gf-market-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--gf-border);
+  font-size: 14px;
+}
+
+.gf-market-nav-label {
+  font-weight: 500;
+  color: var(--gf-text-secondary);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.gf-market-nav-link {
+  color: var(--gf-text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 16px;
+}
+
+.gf-market-nav-link:hover {
+  background: var(--gf-bg-hover);
+}
+
+.gf-market-nav-link.active {
+  background: var(--gf-blue-light);
+  color: var(--gf-blue-dark);
+  font-weight: 500;
+}
+
+/* Classic market bar chips */
+.gf-market-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--gf-border);
+  background: var(--gf-bg-primary);
+  overflow-x: auto;
+}
+
+.gf-market-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 160px;
+}
+
+.gf-market-chip.positive {
+  background: var(--gf-green-bg);
+}
+
+.gf-market-chip.negative {
+  background: var(--gf-red-bg);
+}
+
+.gf-market-chip-arrow {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.gf-market-chip.positive .gf-market-chip-arrow {
+  color: var(--gf-green);
+}
+
+.gf-market-chip.negative .gf-market-chip-arrow {
+  color: var(--gf-red);
+}
+
+.gf-market-chip-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-market-chip-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gf-text-primary);
+}
+
+.gf-market-chip-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gf-text-primary);
+}
+
+.gf-market-chip-change {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* Classic main layout (no sidebar) */
+.gf-main-classic {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  min-height: calc(100vh - 200px);
+}
+
+/* Classic stock detail two-column layout */
+.gf-classic-layout {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+}
+
+.gf-classic-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gf-classic-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* Stock detail header - classic mode */
+.gf-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.gf-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.gf-btn-follow {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--gf-border);
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--gf-text-primary);
+}
+
+.gf-btn-follow:hover {
+  background: var(--gf-bg-hover);
+}
+
+.gf-btn-follow.following {
+  background: var(--gf-blue-light);
+  color: var(--gf-blue-dark);
+  border-color: var(--gf-blue-dark);
+}
+
+.gf-btn-share {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--gf-border);
+  background: white;
+  font-size: 14px;
+  color: var(--gf-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gf-btn-share:hover {
+  background: var(--gf-bg-hover);
+  text-decoration: none;
+}
+
+/* Price row - classic mode */
+.gf-detail-change-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.gf-detail-change-badge.positive {
+  background: var(--gf-green-bg);
+  color: var(--gf-green);
+}
+
+.gf-detail-change-badge.negative {
+  background: var(--gf-red-bg);
+  color: var(--gf-red);
+}
+
+.gf-detail-change-abs {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.gf-detail-meta {
+  font-size: 12px;
+  color: var(--gf-text-tertiary);
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* Key stats - classic card style */
+.gf-classic-sidebar .gf-section {
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.gf-classic-sidebar .gf-section-title {
+  border-bottom: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gf-text-tertiary);
+  margin-bottom: 8px;
+  padding-bottom: 0;
+}
+
+.gf-classic-sidebar .gf-stats-grid {
+  grid-template-columns: 1fr;
+}
+
+.gf-classic-sidebar .gf-stat-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gf-border-light);
+}
+
+.gf-classic-sidebar .gf-stat-row:nth-child(odd) {
+  background: none;
+}
+
+.gf-classic-sidebar .gf-stat-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--gf-text-tertiary);
+}
+
+.gf-classic-sidebar .gf-stat-value {
+  font-size: 14px;
+}
+
+/* About card - classic mode */
+.gf-about-card {
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.gf-about-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gf-about-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gf-text-primary);
+}
+
+.gf-about-body {
+  padding: 0 16px 16px;
+}
+
+.gf-about-description {
+  font-size: 14px;
+  color: var(--gf-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.gf-about-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-about-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.gf-about-label {
+  color: var(--gf-text-tertiary);
+}
+
+.gf-about-value {
+  color: var(--gf-text-primary);
+  font-weight: 500;
+  text-align: right;
+}
+
+/* ClassicFinancials component */
+.cf-container {
+  margin-top: 32px;
+}
+
+.cf-heading {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--gf-text-primary);
+  margin-bottom: 16px;
+}
+
+.cf-section {
+  border: 1px solid var(--gf-border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.cf-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cf-section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gf-text-primary);
+  margin: 0;
+}
+
+.cf-chevron {
+  font-size: 12px;
+  color: var(--gf-text-tertiary);
+}
+
+.cf-section-body {
+  padding: 0 20px 20px;
+}
+
+.cf-view-toggle {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cf-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--gf-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+
+.cf-toggle-btn.active {
+  color: var(--gf-blue-dark);
+  border-bottom-color: var(--gf-blue-dark);
+  font-weight: 500;
+}
+
+.cf-chart {
+  margin-bottom: 16px;
+}
+
+.cf-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cf-table thead th {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gf-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gf-border);
+}
+
+.cf-table .cf-table-label {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gf-text-primary);
+  padding: 12px 0;
+}
+
+.cf-table .cf-table-value {
+  text-align: right;
+  font-size: 14px;
+  color: var(--gf-text-primary);
+  font-variant-numeric: tabular-nums;
+  padding: 12px 0;
+}
+
+.cf-table .cf-table-yoy {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 0;
+  color: var(--gf-text-tertiary);
+}
+
+.cf-table .cf-table-yoy.gf-positive {
+  color: var(--gf-green);
+}
+
+.cf-table .cf-table-yoy.gf-negative {
+  color: var(--gf-red);
+}
+
+.cf-table tbody tr {
+  border-bottom: 1px solid var(--gf-border-light);
+}
+
+/* Classic watchlist page */
+.gf-classic-wl-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--gf-border);
+}
+
+.gf-classic-wl-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--gf-border);
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--gf-text-primary);
+  white-space: nowrap;
+}
+
+.gf-classic-wl-tab:hover {
+  background: var(--gf-bg-hover);
+}
+
+.gf-classic-wl-tab.active {
+  background: var(--gf-blue-light);
+  border-color: var(--gf-blue-dark);
+  color: var(--gf-blue-dark);
+}
+
+.gf-classic-wl-tab-icon {
+  font-size: 14px;
+  color: var(--gf-text-tertiary);
+}
+
+.gf-classic-wl-tab-count {
+  font-size: 13px;
+  color: var(--gf-text-tertiary);
+  font-weight: 400;
+}
+
+.gf-classic-wl-tab-new {
+  border-style: dashed;
+  color: var(--gf-text-secondary);
+}
+
+.gf-classic-wl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gf-classic-wl-title {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--gf-text-primary);
+}
+
+.gf-classic-wl-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Classic watchlist rows */
+.gf-classic-wl-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-classic-wl-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--gf-border-light);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.gf-classic-wl-row:hover {
+  background: var(--gf-bg-hover);
+}
+
+.gf-ticker-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  min-width: 48px;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.gf-classic-wl-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--gf-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.gf-classic-wl-price {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gf-text-primary);
+  font-variant-numeric: tabular-nums;
+  min-width: 80px;
+  text-align: right;
+}
+
+.gf-classic-wl-change {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  min-width: 80px;
+  text-align: right;
+  color: var(--gf-text-primary);
+}
+
+.gf-classic-wl-change.negative {
+  color: var(--gf-red);
+}
+
+.gf-classic-wl-pct {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 80px;
+  text-align: right;
+}
+
+.gf-classic-wl-pct.positive {
+  color: var(--gf-green);
+}
+
+.gf-classic-wl-pct.negative {
+  color: var(--gf-red);
+}
+
+.gf-classic-wl-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--gf-text-tertiary);
+  font-size: 14px;
+}
+
+/* Breadcrumb - classic */
+.gf-breadcrumb {
+  font-size: 12px;
+  color: var(--gf-text-tertiary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gf-breadcrumb a,
+.gf-breadcrumb .active {
+  color: var(--gf-blue-dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Responsive - classic mode */
+@media (max-width: 900px) {
+  .gf-classic-layout {
+    flex-direction: column;
+  }
+
+  .gf-classic-sidebar {
+    width: 100%;
+  }
+
+  .gf-market-chip {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gf-main-classic {
+    padding: 16px;
+  }
+
+  .gf-market-nav {
+    padding: 8px 16px;
+    overflow-x: auto;
+  }
+
+  .gf-detail-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .gf-detail-actions {
+    width: 100%;
+  }
+}

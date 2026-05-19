@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { searchSymbols } from '../services/api';
 import type { YahooSearchQuote } from '../services/api';
 
@@ -8,7 +8,6 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState<YahooSearchQuote[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -149,14 +148,12 @@ export default function Header() {
         )}
       </div>
 
-      <nav className="gf-header-nav">
-        <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-          Watchlist
-        </Link>
-        <Link to="/markets" className={location.pathname === '/markets' ? 'active' : ''}>
-          Markets
-        </Link>
-      </nav>
+      <div className="gf-header-right">
+        <div className="gf-mode-toggle">
+          <span className="gf-mode-active">{'\u2713'} Classic</span>
+          <span className="gf-mode-inactive">Beta</span>
+        </div>
+      </div>
     </header>
   );
 }
