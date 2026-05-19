@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { marketIndices as mockIndices } from '../data/mockData';
 import { getMarketIndices } from '../services/api';
 import type { MarketIndex } from '../types';
 
@@ -12,7 +11,8 @@ const INDEX_NAMES: Record<string, string> = {
 };
 
 export default function MarketBar() {
-  const [indices, setIndices] = useState<MarketIndex[]>(mockIndices);
+  const [indices, setIndices] = useState<MarketIndex[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getMarketIndices()
@@ -24,12 +24,21 @@ export default function MarketBar() {
           change: q.regularMarketChange,
           changePercent: q.regularMarketChangePercent,
         }));
-        if (mapped.length > 0) setIndices(mapped);
+        setIndices(mapped);
       })
       .catch(() => {
-        // keep mock data
-      });
+        // API unavailable
+      })
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return <div className="gf-market-bar"><div className="gf-market-item">Loading market data...</div></div>;
+  }
+
+  if (indices.length === 0) {
+    return <div className="gf-market-bar"><div className="gf-market-item">Market data unavailable</div></div>;
+  }
 
   return (
     <div className="gf-market-bar">

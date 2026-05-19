@@ -2,12 +2,6 @@ import { useState, useEffect } from 'react';
 import type { Stock, ChartDataPoint, EarningsData, FinancialData } from '../types';
 import type { CurrencyCode } from '../types';
 import * as api from '../services/api';
-import {
-  stocks as mockStocks,
-  getChartData as getMockChartData,
-  getEarningsForStock as getMockEarnings,
-  getFinancialsForStock as getMockFinancials,
-} from '../data/mockData';
 
 function mapCurrency(code: string | undefined): CurrencyCode {
   const valid: CurrencyCode[] = ['USD', 'EUR', 'GBP', 'HKD', 'JPY', 'CHF', 'CAD', 'AUD', 'CNY', 'SGD'];
@@ -75,14 +69,7 @@ export function useQuote(symbol: string | undefined) {
       })
       .catch((err) => {
         if (cancelled) return;
-        // Fall back to mock data
-        const mock = mockStocks[symbol.toUpperCase()] || mockStocks[symbol];
-        if (mock) {
-          setStock(mock);
-          setError(null);
-        } else {
-          setError(err.message);
-        }
+        setError(err.message);
         setLoading(false);
       });
 
@@ -153,9 +140,7 @@ export function useChartData(symbol: string | undefined, timeframe: string) {
       })
       .catch(() => {
         if (cancelled) return;
-        // Fall back to mock
-        const mock = getMockChartData(symbol, timeframe);
-        setData(mock);
+        setData([]);
         setLoading(false);
       });
 
@@ -206,12 +191,12 @@ export function useEarnings(symbol: string | undefined) {
           };
         });
 
-        setData(earnings.length > 0 ? earnings : getMockEarnings(symbol));
+        setData(earnings);
         setLoading(false);
       })
       .catch(() => {
         if (cancelled) return;
-        setData(getMockEarnings(symbol));
+        setData([]);
         setLoading(false);
       });
 
@@ -279,13 +264,13 @@ export function useFinancials(symbol: string | undefined) {
         const q = mapStatements(result.incomeStatementHistoryQuarterly);
         const a = mapAnnualStatements(result.incomeStatementHistory);
 
-        setQuarterly(q.length > 0 ? q : getMockFinancials(symbol));
+        setQuarterly(q);
         setAnnual(a);
         setLoading(false);
       })
       .catch(() => {
         if (cancelled) return;
-        setQuarterly(getMockFinancials(symbol));
+        setQuarterly([]);
         setAnnual([]);
         setLoading(false);
       });

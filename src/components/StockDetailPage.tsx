@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCurrencySymbol } from '../utils/currency';
 import { useWatchlists } from '../context/WatchlistContext';
-import { generateSparkline } from '../data/mockData';
 import { useQuote, useCompanyInfo } from '../hooks/useStockData';
 import StockChart from './StockChart';
 import KeyStats from './KeyStats';
@@ -71,7 +70,7 @@ export default function StockDetailPage() {
         changePercent: stock.changePercent,
         marketCap: stock.marketCap,
         volume: stock.volume,
-        sparklineData: generateSparkline(stock.price, stock.price * 0.02),
+        sparklineData: [],
         currency: stock.currency,
       });
     }
