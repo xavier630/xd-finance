@@ -201,7 +201,7 @@ export default function WatchlistPage() {
                   {sym}{price.toFixed(2)}
                 </td>
                 <td className={`right ${change >= 0 ? 'gf-positive' : 'gf-negative'}`} onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
-                  {change >= 0 ? '+' : ''}{sym}{Math.abs(change).toFixed(2)}
+                  {change >= 0 ? '+' : '-'}{sym}{Math.abs(change).toFixed(2)}
                 </td>
                 <td className="right" onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
                   <span className={`gf-change-badge ${changePct >= 0 ? 'positive' : 'negative'}`}>
