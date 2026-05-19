@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { stocks, relatedStocks } from '../data/mockData';
+import { getCurrencySymbol } from '../utils/currency';
 
 interface RelatedCompaniesProps {
   symbol: string;
@@ -21,7 +22,7 @@ export default function RelatedCompanies({ symbol }: RelatedCompaniesProps) {
             <Link key={sym} to={`/quote/${sym}`} className="gf-related-card">
               <div className="gf-related-symbol">{sym}</div>
               <div className="gf-related-name">{stock.name}</div>
-              <div className="gf-related-price">${stock.price.toFixed(2)}</div>
+              <div className="gf-related-price">{getCurrencySymbol(stock.currency)}{stock.price.toFixed(2)}</div>
               <div className={`gf-related-change ${stock.change >= 0 ? 'gf-positive' : 'gf-negative'}`}>
                 {stock.change >= 0 ? '+' : ''}
                 {stock.change.toFixed(2)} ({stock.change >= 0 ? '+' : ''}

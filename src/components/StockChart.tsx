@@ -9,7 +9,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { getChartData } from '../data/mockData';
-import type { ChartTimeframe } from '../types';
+import { getCurrencySymbol } from '../utils/currency';
+import type { ChartTimeframe, CurrencyCode } from '../types';
 
 const timeframes: ChartTimeframe[] = ['1D', '5D', '1M', '6M', 'YTD', '1Y', '5Y', 'MAX'];
 
@@ -17,9 +18,10 @@ interface StockChartProps {
   symbol: string;
   currentPrice: number;
   change: number;
+  currency: CurrencyCode;
 }
 
-export default function StockChart({ symbol, currentPrice, change }: StockChartProps) {
+export default function StockChart({ symbol, currentPrice, change, currency }: StockChartProps) {
   const [activeTimeframe, setActiveTimeframe] = useState<ChartTimeframe>('1Y');
   const data = getChartData(symbol, activeTimeframe);
   const isPositive = change >= 0;
@@ -37,8 +39,10 @@ export default function StockChart({ symbol, currentPrice, change }: StockChartP
     return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
   }
 
+  const sym = getCurrencySymbol(currency);
+
   function formatPrice(value: number): string {
-    return `$${value.toFixed(2)}`;
+    return `${sym}${value.toFixed(2)}`;
   }
 
   return (
