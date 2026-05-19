@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { watchlists } from '../data/mockData';
+import { formatCurrencyValue, getCurrencySymbol } from '../utils/currency';
 import Sparkline from './Sparkline';
+import type { CurrencyCode } from '../types';
 
-function formatMarketCap(value: number): string {
-  if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-  return `$${value.toLocaleString()}`;
+function formatMarketCap(value: number, currency: CurrencyCode): string {
+  return formatCurrencyValue(value, currency, { compact: true });
 }
 
 function formatVolume(value: number): string {
@@ -59,36 +58,42 @@ export default function WatchlistPage() {
           </tr>
         </thead>
         <tbody>
-          {activeWatchlist.items.map((item) => (
-            <tr key={item.symbol} onClick={() => navigate(`/quote/${item.symbol}`)}>
-              <td>
-                <div className="gf-stock-symbol">{item.symbol}</div>
-                <div className="gf-stock-name">{item.name}</div>
-              </td>
-              <td className="right gf-price">${item.price.toFixed(2)}</td>
-              <td className={`right ${item.change >= 0 ? 'gf-positive' : 'gf-negative'}`}>
-                {item.change >= 0 ? '+' : ''}
-                {item.change.toFixed(2)}
-              </td>
-              <td className="right">
-                <span
-                  className={`gf-change-badge ${item.changePercent >= 0 ? 'positive' : 'negative'}`}
-                >
-                  {item.changePercent >= 0 ? '+' : ''}
-                  {item.changePercent.toFixed(2)}%
-                </span>
-              </td>
-              <td className="right" style={{ color: 'var(--gf-text-secondary)' }}>
-                {formatMarketCap(item.marketCap)}
-              </td>
-              <td className="right" style={{ color: 'var(--gf-text-secondary)' }}>
-                {formatVolume(item.volume)}
-              </td>
-              <td className="right">
-                <Sparkline data={item.sparklineData} />
-              </td>
-            </tr>
-          ))}
+          {activeWatchlist.items.map((item) => {
+            const sym = getCurrencySymbol(item.currency);
+            return (
+              <tr key={item.symbol} onClick={() => navigate(`/quote/${item.symbol}`)}>
+                <td>
+                  <div className="gf-stock-symbol">{item.symbol}</div>
+                  <div className="gf-stock-name">{item.name}</div>
+                </td>
+                <td className="right gf-price">
+                  {sym}
+                  {item.price.toFixed(2)}
+                </td>
+                <td className={`right ${item.change >= 0 ? 'gf-positive' : 'gf-negative'}`}>
+                  {item.change >= 0 ? '+' : ''}
+                  {item.change.toFixed(2)}
+                </td>
+                <td className="right">
+                  <span
+                    className={`gf-change-badge ${item.changePercent >= 0 ? 'positive' : 'negative'}`}
+                  >
+                    {item.changePercent >= 0 ? '+' : ''}
+                    {item.changePercent.toFixed(2)}%
+                  </span>
+                </td>
+                <td className="right" style={{ color: 'var(--gf-text-secondary)' }}>
+                  {formatMarketCap(item.marketCap, item.currency)}
+                </td>
+                <td className="right" style={{ color: 'var(--gf-text-secondary)' }}>
+                  {formatVolume(item.volume)}
+                </td>
+                <td className="right">
+                  <Sparkline data={item.sparklineData} />
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

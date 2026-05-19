@@ -1,7 +1,10 @@
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'HKD' | 'JPY' | 'CHF' | 'CAD' | 'AUD' | 'CNY' | 'SGD';
+
 export interface Stock {
   symbol: string;
   name: string;
   exchange: string;
+  currency: CurrencyCode;
   price: number;
   change: number;
   changePercent: number;
@@ -80,6 +83,7 @@ export interface WatchlistItem {
   marketCap: number;
   volume: number;
   sparklineData: number[];
+  currency: CurrencyCode;
 }
 
 export interface Watchlist {
@@ -96,4 +100,5 @@ export interface MarketIndex {
   value: number;
   change: number;
   changePercent: number;
+  currency?: CurrencyCode;
 }

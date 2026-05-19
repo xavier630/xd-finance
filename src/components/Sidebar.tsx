@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { watchlists, stocks } from '../data/mockData';
+import { getCurrencySymbol } from '../utils/currency';
 
 export default function Sidebar() {
   const mainWatchlist = watchlists[0];
@@ -14,7 +15,7 @@ export default function Sidebar() {
               <div className="gf-sidebar-stock-symbol">{item.symbol}</div>
             </div>
             <div>
-              <div className="gf-sidebar-stock-price">${item.price.toFixed(2)}</div>
+              <div className="gf-sidebar-stock-price">{getCurrencySymbol(item.currency)}{item.price.toFixed(2)}</div>
               <div
                 className={`gf-sidebar-stock-change ${
                   item.changePercent >= 0 ? 'gf-positive' : 'gf-negative'
@@ -39,7 +40,7 @@ export default function Sidebar() {
                 <div className="gf-sidebar-stock-symbol">{sym}</div>
               </div>
               <div>
-                <div className="gf-sidebar-stock-price">${stock.price.toFixed(2)}</div>
+                <div className="gf-sidebar-stock-price">{getCurrencySymbol(stock.currency)}{stock.price.toFixed(2)}</div>
                 <div
                   className={`gf-sidebar-stock-change ${
                     stock.changePercent >= 0 ? 'gf-positive' : 'gf-negative'

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { stocks } from '../data/mockData';
+import { getCurrencySymbol } from '../utils/currency';
 
 export default function Header() {
   const [query, setQuery] = useState('');
@@ -125,7 +126,7 @@ export default function Header() {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>${stocks[symbol].price.toFixed(2)}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>{getCurrencySymbol(stocks[symbol].currency)}{stocks[symbol].price.toFixed(2)}</div>
                   <div
                     style={{
                       fontSize: '12px',

@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { stocks } from '../data/mockData';
+import { getCurrencySymbol } from '../utils/currency';
 import StockChart from './StockChart';
 import KeyStats from './KeyStats';
 import EarningsHistory from './EarningsHistory';
@@ -10,7 +11,7 @@ import RelatedCompanies from './RelatedCompanies';
 
 export default function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
-  const stock = symbol ? stocks[symbol.toUpperCase()] : undefined;
+  const stock = symbol ? (stocks[symbol.toUpperCase()] || stocks[symbol]) : undefined;
 
   if (!stock) {
     return (
@@ -47,7 +48,7 @@ export default function StockDetailPage() {
         </div>
 
         <div className="gf-detail-price-row">
-          <span className="gf-detail-price">${stock.price.toFixed(2)}</span>
+          <span className="gf-detail-price">{getCurrencySymbol(stock.currency)}{stock.price.toFixed(2)}</span>
           <span className={`gf-detail-change ${isPositive ? 'gf-positive' : 'gf-negative'}`}>
             {isPositive ? '+' : ''}
             {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
@@ -56,11 +57,11 @@ export default function StockDetailPage() {
         </div>
 
         <div className="gf-detail-meta">
-          Closed: {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} &middot; USD &middot; {stock.exchange}
+          Closed: {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} &middot; {stock.currency} &middot; {stock.exchange}
         </div>
       </div>
 
-      <StockChart symbol={stock.symbol} currentPrice={stock.price} change={stock.change} />
+      <StockChart symbol={stock.symbol} currentPrice={stock.price} change={stock.change} currency={stock.currency} />
 
       <KeyStats stock={stock} />
 
