@@ -239,20 +239,23 @@ export function useFinancials(symbol: string | undefined) {
         if (cancelled) return;
 
         const toFinancial = (s: { endDate: string; totalRevenue: number; netIncome: number; grossProfit: number; operatingIncome: number; costOfRevenue?: number; ebit?: number }, periodLabel: string): FinancialData => {
-          const opExpense = s.totalRevenue - s.operatingIncome;
-          const margin = s.totalRevenue ? (s.netIncome / s.totalRevenue) * 100 : 0;
+          const revenue = s.totalRevenue ?? 0;
+          const opIncome = s.operatingIncome ?? 0;
+          const netInc = s.netIncome ?? 0;
+          const opExpense = revenue - opIncome;
+          const margin = revenue ? (netInc / revenue) * 100 : 0;
           return {
             period: periodLabel,
-            revenue: s.totalRevenue,
+            revenue,
             operatingExpense: opExpense,
-            netIncome: s.netIncome,
+            netIncome: netInc,
             netProfitMargin: margin,
             earningsPerShare: 0,
-            ebitda: s.ebit || s.operatingIncome,
+            ebitda: s.ebit ?? opIncome,
             effectiveTaxRate: 0,
-            grossProfit: s.grossProfit,
-            operatingIncome: s.operatingIncome,
-            costOfRevenue: s.costOfRevenue || 0,
+            grossProfit: s.grossProfit ?? 0,
+            operatingIncome: opIncome,
+            costOfRevenue: s.costOfRevenue ?? 0,
           };
         };
 
