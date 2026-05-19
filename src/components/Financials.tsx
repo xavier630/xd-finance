@@ -5,7 +5,8 @@ interface FinancialsProps {
   symbol: string;
 }
 
-function formatCurrency(value: number): string {
+function formatCurrency(value: number | null | undefined): string {
+  if (value == null) return '$0';
   if (Math.abs(value) >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
   if (Math.abs(value) >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
   return `$${value.toLocaleString()}`;
@@ -89,14 +90,14 @@ export default function Financials({ symbol }: FinancialsProps) {
           <tr>
             <td>Net Profit Margin</td>
             {financials.map((f) => (
-              <td key={f.period}>{f.netProfitMargin.toFixed(2)}%</td>
+              <td key={f.period}>{(f.netProfitMargin ?? 0).toFixed(2)}%</td>
             ))}
           </tr>
           {financials.some((f) => f.earningsPerShare !== 0) && (
             <tr>
               <td>EPS</td>
               {financials.map((f) => (
-                <td key={f.period}>${f.earningsPerShare.toFixed(2)}</td>
+                <td key={f.period}>${(f.earningsPerShare ?? 0).toFixed(2)}</td>
               ))}
             </tr>
           )}
@@ -110,7 +111,7 @@ export default function Financials({ symbol }: FinancialsProps) {
             <tr>
               <td>Effective Tax Rate</td>
               {financials.map((f) => (
-                <td key={f.period}>{f.effectiveTaxRate.toFixed(1)}%</td>
+                <td key={f.period}>{(f.effectiveTaxRate ?? 0).toFixed(1)}%</td>
               ))}
             </tr>
           )}
