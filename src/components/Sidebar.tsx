@@ -18,6 +18,7 @@ export default function Sidebar() {
   const { watchlists } = useWatchlists();
   const mainWatchlist = watchlists[0];
   const [trending, setTrending] = useState<TrendingStock[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
 
   useEffect(() => {
     getQuotes(TRENDING_SYMBOLS)
@@ -36,7 +37,8 @@ export default function Sidebar() {
       })
       .catch(() => {
         // API unavailable
-      });
+      })
+      .finally(() => setTrendingLoading(false));
   }, []);
 
   return (
@@ -90,7 +92,7 @@ export default function Sidebar() {
         ))}
         {trending.length === 0 && (
           <div style={{ padding: '8px 12px', color: '#999', fontSize: 13 }}>
-            Loading...
+            {trendingLoading ? 'Loading...' : 'Trending data unavailable'}
           </div>
         )}
       </div>
