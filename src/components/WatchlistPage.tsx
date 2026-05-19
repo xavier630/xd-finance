@@ -109,7 +109,7 @@ export default function WatchlistPage() {
             className={`gf-classic-wl-tab ${activeTab === wl.id ? 'active' : ''}`}
             onClick={() => setActiveTab(wl.id)}
           >
-            <span className="gf-classic-wl-tab-icon">{'\u2630'}</span>
+            <span className="gf-classic-wl-tab-icon">{'☰'}</span>
             {wl.name}
             <span className="gf-classic-wl-tab-count">{wl.items.length}</span>
           </button>
@@ -212,7 +212,7 @@ export default function WatchlistPage() {
                 }}
                 title="Remove from watchlist"
               >
-                {'\u2715'}
+                {'✕'}
               </button>
             </div>
           );

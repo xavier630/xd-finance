@@ -158,7 +158,10 @@ app.get('/api/earnings-history/:symbol', async (req, res) => {
   const cached = getCached(cacheKey);
   if (cached) return res.json(cached);
 
-  const AV_KEY = process.env.ALPHA_VANTAGE_KEY || 'WSYRYDHT9SM586ZV';
+  const AV_KEY = process.env.ALPHA_VANTAGE_KEY;
+  if (!AV_KEY) {
+    return res.status(503).json({ error: 'ALPHA_VANTAGE_KEY not configured' });
+  }
   try {
     const url = `https://www.alphavantage.co/query?function=EARNINGS&symbol=${encodeURIComponent(symbol)}&apikey=${AV_KEY}`;
     const response = await fetch(url);
