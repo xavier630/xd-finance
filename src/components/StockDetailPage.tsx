@@ -11,6 +11,25 @@ import NewsSection from './NewsSection';
 import CompanyInfo from './CompanyInfo';
 import RelatedCompanies from './RelatedCompanies';
 
+const GOOGLE_FINANCE_EXCHANGE_MAP: Record<string, string> = {
+  'NASDAQ': 'NASDAQ', 'NasdaqGS': 'NASDAQ', 'NasdaqGM': 'NASDAQ', 'NasdaqCM': 'NASDAQ',
+  'NYSE': 'NYSE', 'NYSEArca': 'NYSEARCA',
+  'LSE': 'LON', 'London': 'LON', 'London Stock Exchange': 'LON',
+  'XETRA': 'ETR',
+  'HKSE': 'HKG', 'Hong Kong': 'HKG',
+  'SIX': 'SWX', 'Swiss Exchange': 'SWX',
+  'Euronext': 'EPA', 'Euronext Paris': 'EPA',
+  'TSE': 'TYO', 'Tokyo': 'TYO',
+  'ASX': 'ASX',
+  'TSX': 'TSE',
+};
+
+function getGoogleFinanceUrl(symbol: string, exchange: string): string {
+  const gExchange = GOOGLE_FINANCE_EXCHANGE_MAP[exchange] || exchange;
+  const cleanSymbol = symbol.replace(/\.(DE|L|HK|SW|PA|TO|AX|T)$/, '');
+  return `https://www.google.com/finance/quote/${encodeURIComponent(cleanSymbol)}:${encodeURIComponent(gExchange)}?window=5Y`;
+}
+
 export default function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
   const { stock, loading, error } = useQuote(symbol);
@@ -102,6 +121,14 @@ export default function StockDetailPage() {
             {stock.changePercent.toFixed(2)}%)
           </span>
           <div className="gf-watchlist-btn-container">
+            <a
+              href={getGoogleFinanceUrl(stock.symbol, stock.exchange)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gf-btn-google-finance"
+            >
+              View on Google Finance
+            </a>
             <button
               className={`gf-btn-watchlist ${isWatched ? 'watched' : ''}`}
               onClick={() => setShowWatchlistMenu(!showWatchlistMenu)}

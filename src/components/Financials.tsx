@@ -93,7 +93,7 @@ export default function Financials({ symbol }: FinancialsProps) {
               <td key={f.period}>{(f.netProfitMargin ?? 0).toFixed(2)}%</td>
             ))}
           </tr>
-          {financials.some((f) => f.earningsPerShare !== 0) && (
+          {financials.some((f) => (f.earningsPerShare ?? 0) !== 0) && (
             <tr>
               <td>EPS</td>
               {financials.map((f) => (
@@ -107,7 +107,7 @@ export default function Financials({ symbol }: FinancialsProps) {
               <td key={f.period}>{formatCurrency(f.ebitda)}</td>
             ))}
           </tr>
-          {financials.some((f) => f.effectiveTaxRate !== 0) && (
+          {financials.some((f) => (f.effectiveTaxRate ?? 0) !== 0) && (
             <tr>
               <td>Effective Tax Rate</td>
               {financials.map((f) => (

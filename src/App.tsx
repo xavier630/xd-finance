@@ -24,7 +24,7 @@ export default function App() {
           </main>
         </div>
         <footer className="gf-footer">
-          <span>Google Finance Clone &mdash; Mock Data Only</span>
+          <span>XD Finance &mdash; Powered by Yahoo Finance</span>
           <a href="#">Help</a>
           <a href="#">Send feedback</a>
           <a href="#">Privacy</a>
