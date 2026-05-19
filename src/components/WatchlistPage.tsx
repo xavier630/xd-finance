@@ -1,19 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlists } from '../context/WatchlistContext';
-import { formatCurrencyValue, getCurrencySymbol } from '../utils/currency';
-import Sparkline from './Sparkline';
+import { getCurrencySymbol } from '../utils/currency';
+import { getQuotes } from '../services/api';
+import type { YahooQuote } from '../services/api';
 import type { CurrencyCode } from '../types';
 
-function formatMarketCap(value: number, currency: CurrencyCode): string {
-  return formatCurrencyValue(value, currency, { compact: true });
-}
-
-function formatVolume(value: number): string {
-  if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `${(value / 1e6).toFixed(2)}M`;
-  if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`;
-  return value.toLocaleString();
+interface LiveStockData {
+  price: number;
+  change: number;
+  changePercent: number;
+  fiftyTwoWeekChangePercent: number | null;
+  currency: CurrencyCode;
 }
 
 export default function WatchlistPage() {
@@ -23,9 +21,37 @@ export default function WatchlistPage() {
   const [newWatchlistName, setNewWatchlistName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [liveData, setLiveData] = useState<Record<string, LiveStockData>>({});
+  const [liveLoading, setLiveLoading] = useState(false);
   const navigate = useNavigate();
 
   const activeWatchlist = watchlists.find((w) => w.id === activeTab) || watchlists[0];
+
+  useEffect(() => {
+    const symbols = activeWatchlist?.items.map((i) => i.symbol) || [];
+    if (symbols.length === 0) return;
+
+    setLiveLoading(true);
+    getQuotes(symbols)
+      .then((data) => {
+        const live: Record<string, LiveStockData> = {};
+        for (const sym of symbols) {
+          const q = data[sym] as YahooQuote | undefined;
+          if (q) {
+            live[sym] = {
+              price: q.regularMarketPrice,
+              change: q.regularMarketChange,
+              changePercent: q.regularMarketChangePercent,
+              fiftyTwoWeekChangePercent: q.fiftyTwoWeekChangePercent ?? null,
+              currency: (q.currency || 'USD') as CurrencyCode,
+            };
+          }
+        }
+        setLiveData(live);
+      })
+      .catch(() => {})
+      .finally(() => setLiveLoading(false));
+  }, [activeWatchlist?.id, activeWatchlist?.items.length]);
 
   function handleCreateWatchlist() {
     if (newWatchlistName.trim()) {
@@ -138,24 +164,33 @@ export default function WatchlistPage() {
         ))}
       </div>
 
+      {liveLoading && activeWatchlist?.items.length > 0 && (
+        <div style={{ padding: '8px 0', color: 'var(--gf-text-tertiary)', fontSize: 13 }}>
+          Refreshing live prices...
+        </div>
+      )}
+
       <table className="gf-watchlist-table">
         <thead>
           <tr>
             <th style={{ width: '25%' }}>Symbol</th>
             <th className="right">Price</th>
             <th className="right">Change</th>
-            <th className="right">% Change</th>
-            <th className="right">Market Cap</th>
-            <th className="right">Volume</th>
-            <th className="right" style={{ width: '100px' }}>
-              30D Trend
-            </th>
+            <th className="right">Day %</th>
+            <th className="right">1Y %</th>
             <th className="right" style={{ width: '40px' }}></th>
           </tr>
         </thead>
         <tbody>
           {activeWatchlist?.items.map((item) => {
-            const sym = getCurrencySymbol(item.currency);
+            const live = liveData[item.symbol];
+            const price = live?.price ?? item.price;
+            const change = live?.change ?? item.change;
+            const changePct = live?.changePercent ?? item.changePercent;
+            const yearPct = live?.fiftyTwoWeekChangePercent;
+            const currency = live?.currency ?? item.currency;
+            const sym = getCurrencySymbol(currency);
+
             return (
               <tr key={item.symbol}>
                 <td onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
@@ -163,29 +198,24 @@ export default function WatchlistPage() {
                   <div className="gf-stock-name">{item.name}</div>
                 </td>
                 <td className="right gf-price" onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
-                  {sym}
-                  {item.price.toFixed(2)}
+                  {sym}{price.toFixed(2)}
                 </td>
-                <td className={`right ${item.change >= 0 ? 'gf-positive' : 'gf-negative'}`} onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
-                  {item.change >= 0 ? '+' : ''}
-                  {item.change.toFixed(2)}
+                <td className={`right ${change >= 0 ? 'gf-positive' : 'gf-negative'}`} onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
+                  {change >= 0 ? '+' : ''}{sym}{Math.abs(change).toFixed(2)}
                 </td>
                 <td className="right" onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
-                  <span
-                    className={`gf-change-badge ${item.changePercent >= 0 ? 'positive' : 'negative'}`}
-                  >
-                    {item.changePercent >= 0 ? '+' : ''}
-                    {item.changePercent.toFixed(2)}%
+                  <span className={`gf-change-badge ${changePct >= 0 ? 'positive' : 'negative'}`}>
+                    {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
                   </span>
                 </td>
-                <td className="right" style={{ color: 'var(--gf-text-secondary)', cursor: 'pointer' }} onClick={() => navigate(`/quote/${item.symbol}`)}>
-                  {formatMarketCap(item.marketCap, item.currency)}
-                </td>
-                <td className="right" style={{ color: 'var(--gf-text-secondary)', cursor: 'pointer' }} onClick={() => navigate(`/quote/${item.symbol}`)}>
-                  {formatVolume(item.volume)}
-                </td>
                 <td className="right" onClick={() => navigate(`/quote/${item.symbol}`)} style={{ cursor: 'pointer' }}>
-                  <Sparkline data={item.sparklineData} />
+                  {yearPct != null ? (
+                    <span className={`gf-change-badge ${yearPct >= 0 ? 'positive' : 'negative'}`}>
+                      {yearPct >= 0 ? '+' : ''}{yearPct.toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--gf-text-tertiary)' }}>—</span>
+                  )}
                 </td>
                 <td className="right">
                   <button
@@ -204,7 +234,7 @@ export default function WatchlistPage() {
           })}
           {activeWatchlist?.items.length === 0 && (
             <tr>
-              <td colSpan={8} style={{ textAlign: 'center', padding: '40px 0', color: 'var(--gf-text-tertiary)' }}>
+              <td colSpan={6} style={{ textAlign: 'center', padding: '40px 0', color: 'var(--gf-text-tertiary)' }}>
                 No stocks in this watchlist. Search for stocks to add.
               </td>
             </tr>
