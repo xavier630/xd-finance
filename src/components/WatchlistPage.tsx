@@ -27,13 +27,17 @@ export default function WatchlistPage() {
 
   const activeWatchlist = watchlists.find((w) => w.id === activeTab) || watchlists[0];
 
+  const symbolsKey = activeWatchlist?.items.map((i) => i.symbol).join(',') ?? '';
+
   useEffect(() => {
     const symbols = activeWatchlist?.items.map((i) => i.symbol) || [];
     if (symbols.length === 0) return;
 
+    let cancelled = false;
     setLiveLoading(true);
     getQuotes(symbols)
       .then((data) => {
+        if (cancelled) return;
         const live: Record<string, LiveStockData> = {};
         for (const sym of symbols) {
           const q = data[sym] as YahooQuote | undefined;
@@ -50,8 +54,10 @@ export default function WatchlistPage() {
         setLiveData(live);
       })
       .catch(() => {})
-      .finally(() => setLiveLoading(false));
-  }, [activeWatchlist?.id, activeWatchlist?.items.length]);
+      .finally(() => { if (!cancelled) setLiveLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [activeWatchlist?.id, symbolsKey]);
 
   function handleCreateWatchlist() {
     if (newWatchlistName.trim()) {
