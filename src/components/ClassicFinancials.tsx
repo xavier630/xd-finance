@@ -126,7 +126,7 @@ function IncomeStatementSection({ data }: { data: NonNullable<ReturnType<typeof 
         return (
           <>
             <FinancialBarChart data={chartData} bars={[{ key: 'Revenue', color: '#4285f4' }, { key: 'Net income', color: '#fbbc04' }]} />
-            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} />
+            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} changeLabel={view === 'quarterly' ? 'Q/Q CHANGE' : 'Y/Y CHANGE'} />
           </>
         );
       })()}
@@ -170,7 +170,7 @@ function BalanceSheetSection({ data }: { data: NonNullable<ReturnType<typeof use
         return (
           <>
             <FinancialBarChart data={chartData} bars={[{ key: 'Total assets', color: '#4285f4' }, { key: 'Total liabilities', color: '#fbbc04' }]} />
-            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} />
+            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} changeLabel={view === 'quarterly' ? 'Q/Q CHANGE' : 'Y/Y CHANGE'} />
           </>
         );
       })()}
@@ -214,7 +214,7 @@ function CashFlowSection({ data }: { data: NonNullable<ReturnType<typeof useFund
         return (
           <>
             <FinancialBarChart data={chartData} bars={[{ key: 'Operating cash flow', color: '#4285f4' }, { key: 'Capital expenditures', color: '#fbbc04' }]} />
-            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} />
+            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} changeLabel={view === 'quarterly' ? 'Q/Q CHANGE' : 'Y/Y CHANGE'} />
           </>
         );
       })()}
@@ -253,14 +253,14 @@ function FinancialBarChart({ data, bars }: { data: Array<Record<string, unknown>
   );
 }
 
-function FinancialTable({ periodLabel, rows }: { periodLabel: string; rows: Array<{ label: string; value: string; yoy: string | null }> }) {
+function FinancialTable({ periodLabel, rows, changeLabel }: { periodLabel: string; rows: Array<{ label: string; value: string; yoy: string | null }>; changeLabel: string }) {
   return (
     <table className="cf-table">
       <thead>
         <tr>
           <th className="cf-table-label"></th>
           <th className="cf-table-value">{periodLabel}</th>
-          <th className="cf-table-yoy">Y/Y CHANGE</th>
+          <th className="cf-table-yoy">{changeLabel}</th>
         </tr>
       </thead>
       <tbody>
