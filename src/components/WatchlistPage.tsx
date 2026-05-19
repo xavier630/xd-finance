@@ -45,7 +45,8 @@ export default function WatchlistPage() {
   function handleDeleteWatchlist(watchlistId: string) {
     deleteWatchlist(watchlistId);
     if (activeTab === watchlistId) {
-      setActiveTab(watchlists[0]?.id || '');
+      const remaining = watchlists.filter((wl) => wl.id !== watchlistId);
+      setActiveTab(remaining[0]?.id || '');
     }
   }
 

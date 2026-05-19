@@ -1130,3 +1130,11 @@ a:hover {
   color: var(--gf-blue-dark);
   font-weight: 500;
 }
+
+/* Loading state */
+.gf-loading {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--gf-text-tertiary);
+  font-size: 14px;
+}

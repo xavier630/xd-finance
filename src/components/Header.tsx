@@ -1,16 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { stocks } from '../data/mockData';
-import { getCurrencySymbol } from '../utils/currency';
+import { searchSymbols } from '../services/api';
+import type { YahooSearchQuote } from '../services/api';
 
 export default function Header() {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<YahooSearchQuote[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -29,18 +30,28 @@ export default function Header() {
 
   function handleSearch(value: string) {
     setQuery(value);
-    if (value.trim()) {
-      const matches = Object.keys(stocks).filter(
-        (s) =>
-          s.toLowerCase().includes(value.toLowerCase()) ||
-          stocks[s].name.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestions(matches.slice(0, 6));
-      setShowSuggestions(true);
-    } else {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (value.trim().length < 1) {
       setSuggestions([]);
       setShowSuggestions(false);
+      return;
     }
+
+    debounceRef.current = setTimeout(() => {
+      searchSymbols(value.trim())
+        .then((result) => {
+          const equities = result.quotes
+            .filter((q) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF')
+            .slice(0, 8);
+          setSuggestions(equities);
+          setShowSuggestions(equities.length > 0);
+        })
+        .catch(() => {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        });
+    }, 250);
   }
 
   function handleSelect(symbol: string) {
@@ -51,11 +62,13 @@ export default function Header() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const upper = query.trim().toUpperCase();
-    if (stocks[upper]) {
-      handleSelect(upper);
-    } else if (suggestions.length > 0) {
-      handleSelect(suggestions[0]);
+    const trimmed = query.trim();
+    if (trimmed) {
+      if (suggestions.length > 0) {
+        handleSelect(suggestions[0].symbol);
+      } else {
+        handleSelect(trimmed.toUpperCase());
+      }
     }
   }
 
@@ -102,10 +115,10 @@ export default function Header() {
               overflow: 'hidden',
             }}
           >
-            {suggestions.map((symbol) => (
+            {suggestions.map((item) => (
               <div
-                key={symbol}
-                onClick={() => handleSelect(symbol)}
+                key={item.symbol}
+                onClick={() => handleSelect(item.symbol)}
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -119,23 +132,15 @@ export default function Header() {
               >
                 <div>
                   <div style={{ fontWeight: 500, fontSize: '14px', color: 'var(--gf-blue-dark)' }}>
-                    {symbol}
+                    {item.symbol}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--gf-text-secondary)' }}>
-                    {stocks[symbol].name} &middot; {stocks[symbol].exchange}
+                    {item.longname || item.shortname || ''} &middot; {item.exchDisp || item.exchange}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>{getCurrencySymbol(stocks[symbol].currency)}{stocks[symbol].price.toFixed(2)}</div>
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      color: stocks[symbol].change >= 0 ? 'var(--gf-green)' : 'var(--gf-red)',
-                    }}
-                  >
-                    {stocks[symbol].change >= 0 ? '+' : ''}
-                    {stocks[symbol].changePercent.toFixed(2)}%
+                  <div style={{ fontSize: '12px', color: 'var(--gf-text-tertiary)' }}>
+                    {item.sector || item.quoteType}
                   </div>
                 </div>
               </div>

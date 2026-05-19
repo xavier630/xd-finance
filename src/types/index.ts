@@ -52,6 +52,9 @@ export interface FinancialData {
   earningsPerShare: number;
   ebitda: number;
   effectiveTaxRate: number;
+  grossProfit?: number;
+  operatingIncome?: number;
+  costOfRevenue?: number;
 }
 
 export interface NewsItem {
@@ -66,7 +69,7 @@ export interface NewsItem {
 
 export interface ChartDataPoint {
   date: string;
-  timestamp: number;
+  timestamp?: number;
   open: number;
   high: number;
   low: number;

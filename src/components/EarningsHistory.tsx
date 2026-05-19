@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import { getEarningsForStock } from '../data/mockData';
+import { useEarnings } from '../hooks/useStockData';
 
 interface EarningsHistoryProps {
   symbol: string;
@@ -21,7 +21,16 @@ function formatRevenue(value: number): string {
 }
 
 export default function EarningsHistory({ symbol }: EarningsHistoryProps) {
-  const earnings = getEarningsForStock(symbol);
+  const { data: earnings, loading } = useEarnings(symbol);
+
+  if (loading) {
+    return (
+      <div className="gf-section">
+        <h3 className="gf-section-title">Earnings</h3>
+        <div className="gf-loading">Loading earnings data...</div>
+      </div>
+    );
+  }
 
   if (earnings.length === 0) {
     return (

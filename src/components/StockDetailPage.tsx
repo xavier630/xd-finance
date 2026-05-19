@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { stocks } from '../data/mockData';
 import { getCurrencySymbol } from '../utils/currency';
 import { useWatchlists } from '../context/WatchlistContext';
 import { generateSparkline } from '../data/mockData';
+import { useQuote, useCompanyInfo } from '../hooks/useStockData';
 import StockChart from './StockChart';
 import KeyStats from './KeyStats';
 import EarningsHistory from './EarningsHistory';
@@ -14,11 +14,20 @@ import RelatedCompanies from './RelatedCompanies';
 
 export default function StockDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
-  const stock = symbol ? (stocks[symbol.toUpperCase()] || stocks[symbol]) : undefined;
+  const { stock, loading, error } = useQuote(symbol);
+  const { profile, beta } = useCompanyInfo(symbol);
   const { watchlists, addStock, removeStock, getWatchlistsForSymbol } = useWatchlists();
   const [showWatchlistMenu, setShowWatchlistMenu] = useState(false);
 
-  if (!stock) {
+  if (loading) {
+    return (
+      <div className="gf-stock-detail">
+        <div className="gf-loading">Loading {symbol}...</div>
+      </div>
+    );
+  }
+
+  if (error || !stock) {
     return (
       <div className="gf-stock-detail">
         <div className="gf-empty-state" style={{ minHeight: 400 }}>
@@ -32,26 +41,38 @@ export default function StockDetailPage() {
     );
   }
 
+  // Merge live profile data into stock
+  const enrichedStock = {
+    ...stock,
+    beta: beta || stock.beta,
+    sector: profile?.sector || stock.sector,
+    industry: profile?.industry || stock.industry,
+    description: profile?.longBusinessSummary || stock.description,
+    ceo: profile?.companyOfficers?.[0]?.name || stock.ceo,
+    employees: profile?.fullTimeEmployees || stock.employees,
+    headquarters: profile ? [profile.city, profile.state, profile.country].filter(Boolean).join(', ') : stock.headquarters,
+    website: profile?.website || stock.website,
+  };
+
   const isPositive = stock.change >= 0;
   const memberOf = getWatchlistsForSymbol(stock.symbol);
   const isWatched = memberOf.length > 0;
 
-  const s = stock; // narrowed past the guard above
-
   function handleToggleWatchlist(watchlistId: string) {
+    if (!stock) return;
     if (memberOf.includes(watchlistId)) {
-      removeStock(watchlistId, s.symbol);
+      removeStock(watchlistId, stock.symbol);
     } else {
       addStock(watchlistId, {
-        symbol: s.symbol,
-        name: s.name,
-        price: s.price,
-        change: s.change,
-        changePercent: s.changePercent,
-        marketCap: s.marketCap,
-        volume: s.volume,
-        sparklineData: generateSparkline(s.price, s.price * 0.02),
-        currency: s.currency,
+        symbol: stock.symbol,
+        name: stock.name,
+        price: stock.price,
+        change: stock.change,
+        changePercent: stock.changePercent,
+        marketCap: stock.marketCap,
+        volume: stock.volume,
+        sparklineData: generateSparkline(stock.price, stock.price * 0.02),
+        currency: stock.currency,
       });
     }
   }
@@ -115,13 +136,13 @@ export default function StockDetailPage() {
 
       <StockChart symbol={stock.symbol} currentPrice={stock.price} change={stock.change} currency={stock.currency} />
 
-      <KeyStats stock={stock} />
+      <KeyStats stock={enrichedStock} />
 
       <EarningsHistory symbol={stock.symbol} />
 
       <Financials symbol={stock.symbol} />
 
-      <CompanyInfo stock={stock} />
+      <CompanyInfo stock={enrichedStock} />
 
       <RelatedCompanies symbol={stock.symbol} />
 

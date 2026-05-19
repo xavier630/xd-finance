@@ -1,9 +1,39 @@
-import { marketIndices } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import { marketIndices as mockIndices } from '../data/mockData';
+import { getMarketIndices } from '../services/api';
+import type { MarketIndex } from '../types';
+
+const INDEX_NAMES: Record<string, string> = {
+  '^DJI': 'Dow Jones',
+  '^GSPC': 'S&P 500',
+  '^IXIC': 'Nasdaq',
+  '^RUT': 'Russell 2000',
+  '^VIX': 'VIX',
+};
 
 export default function MarketBar() {
+  const [indices, setIndices] = useState<MarketIndex[]>(mockIndices);
+
+  useEffect(() => {
+    getMarketIndices()
+      .then((data) => {
+        const mapped: MarketIndex[] = data.map((q) => ({
+          symbol: q.symbol,
+          name: INDEX_NAMES[q.symbol] || q.shortName || q.symbol,
+          value: q.regularMarketPrice,
+          change: q.regularMarketChange,
+          changePercent: q.regularMarketChangePercent,
+        }));
+        if (mapped.length > 0) setIndices(mapped);
+      })
+      .catch(() => {
+        // keep mock data
+      });
+  }, []);
+
   return (
     <div className="gf-market-bar">
-      {marketIndices.map((index) => (
+      {indices.map((index) => (
         <div key={index.symbol} className="gf-market-item">
           <div className="gf-market-item-name">{index.name}</div>
           <div className="gf-market-item-value">
