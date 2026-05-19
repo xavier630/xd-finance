@@ -121,7 +121,7 @@ function IncomeStatementSection({ data }: { data: NonNullable<ReturnType<typeof 
           { label: 'Operating expense', value: formatValue(opExpense), yoy: formatPercent(opExpense, prev ? (prev.totalRevenue ?? 0) - (prev.operatingIncome ?? 0) : null) },
           { label: 'Net income', value: formatValue(latest.netIncome), yoy: formatPercent(latest.netIncome, prev?.netIncome) },
           { label: 'Net profit margin', value: `${margin.toFixed(2)}%`, yoy: prev?.totalRevenue ? formatPercent(margin, (prev.netIncome ?? 0) / prev.totalRevenue * 100) : null },
-          { label: 'EBITDA', value: formatValue(latest.ebit ?? latest.operatingIncome), yoy: formatPercent(latest.ebit ?? latest.operatingIncome, prev?.ebit ?? prev?.operatingIncome) },
+          { label: 'EBIT', value: formatValue(latest.ebit ?? latest.operatingIncome), yoy: formatPercent(latest.ebit ?? latest.operatingIncome, prev?.ebit ?? prev?.operatingIncome) },
         ];
         return (
           <>

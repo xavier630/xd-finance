@@ -169,6 +169,9 @@ app.get('/api/earnings-history/:symbol', async (req, res) => {
     if (data['Note'] || data['Information']) {
       return res.status(429).json({ error: 'Alpha Vantage rate limit reached' });
     }
+    if (data['Error Message']) {
+      return res.status(400).json({ error: data['Error Message'] });
+    }
     setCache(cacheKey, data, FUNDAMENTALS_TTL);
     res.json(data);
   } catch (err) {
