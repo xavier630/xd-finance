@@ -411,27 +411,37 @@ export const financialData: Record<string, FinancialData[]> = {
 
 function generateChartData(basePrice: number, days: number, volatility: number): ChartDataPoint[] {
   const data: ChartDataPoint[] = [];
-  let price = basePrice * (1 - volatility * days * 0.001);
+  const startPrice = basePrice * (0.7 + Math.random() * 0.15);
+  let price = startPrice;
   const now = new Date();
+  const tradingDays: Date[] = [];
 
   for (let i = days; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     if (date.getDay() === 0 || date.getDay() === 6) continue;
+    tradingDays.push(date);
+  }
 
-    const dailyChange = (Math.random() - 0.48) * volatility;
-    price += dailyChange;
-    const open = price - (Math.random() - 0.5) * volatility * 0.5;
-    const high = Math.max(price, open) + Math.random() * volatility * 0.3;
-    const low = Math.min(price, open) - Math.random() * volatility * 0.3;
+  const totalDays = tradingDays.length;
+  const drift = (basePrice - startPrice) / Math.max(totalDays, 1);
+
+  for (let idx = 0; idx < totalDays; idx++) {
+    const date = tradingDays[idx];
+    const noise = (Math.random() - 0.5) * volatility * 0.4;
+    price += drift + noise;
+    price = Math.max(price, basePrice * 0.15);
+    const open = price - (Math.random() - 0.5) * volatility * 0.3;
+    const high = Math.max(price, open) + Math.random() * volatility * 0.2;
+    const low = Math.min(price, open) - Math.random() * volatility * 0.2;
     const volume = Math.floor(20000000 + Math.random() * 30000000);
 
     data.push({
       date: date.toISOString().split('T')[0],
       timestamp: date.getTime(),
-      open: Math.round(open * 100) / 100,
-      high: Math.round(high * 100) / 100,
-      low: Math.round(low * 100) / 100,
+      open: Math.round(Math.max(open, 1) * 100) / 100,
+      high: Math.round(Math.max(high, 1) * 100) / 100,
+      low: Math.round(Math.max(low, 1) * 100) / 100,
       close: Math.round(price * 100) / 100,
       volume,
     });
