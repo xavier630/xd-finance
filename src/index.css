@@ -983,3 +983,150 @@ a:hover {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Watchlist management buttons */
+.gf-watchlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gf-btn-primary {
+  background: var(--gf-blue-dark);
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gf-btn-primary:hover {
+  background: #1557b0;
+}
+
+.gf-btn-secondary {
+  background: transparent;
+  color: var(--gf-blue-dark);
+  border: 1px solid var(--gf-border);
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gf-btn-secondary:hover {
+  background: var(--gf-bg-hover);
+}
+
+.gf-btn-danger {
+  background: transparent;
+  color: var(--gf-red);
+  border: 1px solid var(--gf-border);
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gf-btn-danger:hover {
+  background: var(--gf-red-bg);
+}
+
+.gf-btn-remove {
+  background: none;
+  border: none;
+  color: var(--gf-text-tertiary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+}
+.gf-btn-remove:hover {
+  background: var(--gf-red-bg);
+  color: var(--gf-red);
+}
+
+.gf-inline-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.gf-input {
+  padding: 6px 12px;
+  border: 1px solid var(--gf-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  min-width: 200px;
+}
+.gf-input:focus {
+  border-color: var(--gf-blue-dark);
+  box-shadow: 0 0 0 2px var(--gf-blue-light);
+}
+
+/* Add to Watchlist button on detail page */
+.gf-watchlist-btn-container {
+  position: relative;
+  display: inline-block;
+  margin-left: 16px;
+}
+
+.gf-btn-watchlist {
+  background: transparent;
+  border: 1px solid var(--gf-border);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--gf-text-secondary);
+  white-space: nowrap;
+}
+.gf-btn-watchlist:hover {
+  background: var(--gf-bg-hover);
+}
+.gf-btn-watchlist.watched {
+  color: var(--gf-blue-dark);
+  border-color: var(--gf-blue-dark);
+  background: var(--gf-blue-light);
+}
+
+.gf-watchlist-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: white;
+  border: 1px solid var(--gf-border);
+  border-radius: 8px;
+  box-shadow: var(--gf-shadow);
+  z-index: 100;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.gf-watchlist-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--gf-text-primary);
+  text-align: left;
+}
+.gf-watchlist-dropdown-item:hover {
+  background: var(--gf-bg-hover);
+}
+.gf-watchlist-dropdown-item.active {
+  color: var(--gf-blue-dark);
+  font-weight: 500;
+}

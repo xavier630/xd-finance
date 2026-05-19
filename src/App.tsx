@@ -4,9 +4,11 @@ import MarketBar from './components/MarketBar';
 import Sidebar from './components/Sidebar';
 import WatchlistPage from './components/WatchlistPage';
 import StockDetailPage from './components/StockDetailPage';
+import { WatchlistProvider } from './context/WatchlistContext';
 
 export default function App() {
   return (
+    <WatchlistProvider>
     <Router>
       <div>
         <Header />
@@ -31,5 +33,6 @@ export default function App() {
         </footer>
       </div>
     </Router>
+    </WatchlistProvider>
   );
 }

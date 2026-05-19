@@ -515,7 +515,7 @@ export const stocks: Record<string, Stock> = {
   },
 };
 
-function generateSparkline(base: number, volatility: number): number[] {
+export function generateSparkline(base: number, volatility: number): number[] {
   const points: number[] = [];
   let current = base;
   for (let i = 0; i < 30; i++) {
