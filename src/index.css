@@ -1081,7 +1081,7 @@ a:hover {
   color: var(--gf-text-secondary);
   white-space: nowrap;
   text-decoration: none;
-  margin-right: 8px;
+  margin-left: 16px;
 }
 .gf-btn-google-finance:hover {
   background: var(--gf-bg-hover);
