@@ -96,37 +96,40 @@ function IncomeStatementSection({ data }: { data: NonNullable<ReturnType<typeof 
   const rawA = data.incomeStatementHistory?.incomeStatementHistory || [];
   const statements = view === 'quarterly' ? rawQ : rawA;
 
-  if (statements.length === 0) return null;
+  if (rawQ.length === 0 && rawA.length === 0) return null;
 
-  const sorted = [...statements].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+  const hasData = statements.length > 0;
+  const sorted = hasData ? [...statements].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) : [];
   const latest = sorted[sorted.length - 1];
   const prev = sorted.length >= 2 ? sorted[sorted.length - 2] : null;
-
-  const chartData = sorted.map((s) => ({
-    period: formatPeriodLabel(s.endDate, view),
-    Revenue: s.totalRevenue ?? 0,
-    'Net income': s.netIncome ?? 0,
-  }));
-
-  const margin = latest.totalRevenue ? ((latest.netIncome ?? 0) / latest.totalRevenue * 100) : 0;
-  const opExpense = (latest.totalRevenue ?? 0) - (latest.operatingIncome ?? 0);
-
-  const rows: Array<{ label: string; value: string; yoy: string | null }> = [
-    { label: 'Revenue', value: formatValue(latest.totalRevenue), yoy: formatPercent(latest.totalRevenue, prev?.totalRevenue) },
-    { label: 'Operating expense', value: formatValue(opExpense), yoy: formatPercent(opExpense, prev ? (prev.totalRevenue ?? 0) - (prev.operatingIncome ?? 0) : null) },
-    { label: 'Net income', value: formatValue(latest.netIncome), yoy: formatPercent(latest.netIncome, prev?.netIncome) },
-    { label: 'Net profit margin', value: `${margin.toFixed(2)}%`, yoy: prev?.totalRevenue ? formatPercent(margin, (prev.netIncome ?? 0) / prev.totalRevenue * 100) : null },
-    { label: 'EBITDA', value: formatValue(latest.ebit ?? latest.operatingIncome), yoy: formatPercent(latest.ebit ?? latest.operatingIncome, prev?.ebit ?? prev?.operatingIncome) },
-  ];
 
   return (
     <CollapsibleSection title="Income Statement" defaultOpen={true}>
       <ViewToggle view={view} setView={setView} />
-      <FinancialBarChart data={chartData} bars={[{ key: 'Revenue', color: '#4285f4' }, { key: 'Net income', color: '#fbbc04' }]} />
-      <FinancialTable
-        periodLabel={formatPeriodLabel(latest.endDate, view)}
-        rows={rows}
-      />
+      {!hasData ? (
+        <p style={{ color: 'var(--gf-text-tertiary)', fontSize: 14 }}>No data for this view</p>
+      ) : (() => {
+        const chartData = sorted.map((s) => ({
+          period: formatPeriodLabel(s.endDate, view),
+          Revenue: s.totalRevenue ?? 0,
+          'Net income': s.netIncome ?? 0,
+        }));
+        const margin = latest.totalRevenue ? ((latest.netIncome ?? 0) / latest.totalRevenue * 100) : 0;
+        const opExpense = (latest.totalRevenue ?? 0) - (latest.operatingIncome ?? 0);
+        const rows: Array<{ label: string; value: string; yoy: string | null }> = [
+          { label: 'Revenue', value: formatValue(latest.totalRevenue), yoy: formatPercent(latest.totalRevenue, prev?.totalRevenue) },
+          { label: 'Operating expense', value: formatValue(opExpense), yoy: formatPercent(opExpense, prev ? (prev.totalRevenue ?? 0) - (prev.operatingIncome ?? 0) : null) },
+          { label: 'Net income', value: formatValue(latest.netIncome), yoy: formatPercent(latest.netIncome, prev?.netIncome) },
+          { label: 'Net profit margin', value: `${margin.toFixed(2)}%`, yoy: prev?.totalRevenue ? formatPercent(margin, (prev.netIncome ?? 0) / prev.totalRevenue * 100) : null },
+          { label: 'EBITDA', value: formatValue(latest.ebit ?? latest.operatingIncome), yoy: formatPercent(latest.ebit ?? latest.operatingIncome, prev?.ebit ?? prev?.operatingIncome) },
+        ];
+        return (
+          <>
+            <FinancialBarChart data={chartData} bars={[{ key: 'Revenue', color: '#4285f4' }, { key: 'Net income', color: '#fbbc04' }]} />
+            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} />
+          </>
+        );
+      })()}
     </CollapsibleSection>
   );
 }
@@ -138,36 +141,39 @@ function BalanceSheetSection({ data }: { data: NonNullable<ReturnType<typeof use
   const rawA = data.balanceSheetHistory?.balanceSheetStatements || [];
   const statements = view === 'quarterly' ? rawQ : rawA;
 
-  if (statements.length === 0) return null;
+  if (rawQ.length === 0 && rawA.length === 0) return null;
 
-  const sorted = [...statements].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+  const hasData = statements.length > 0;
+  const sorted = hasData ? [...statements].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) : [];
   const latest = sorted[sorted.length - 1];
   const prev = sorted.length >= 2 ? sorted[sorted.length - 2] : null;
-
-  const chartData = sorted.map((s) => ({
-    period: formatPeriodLabel(s.endDate, view),
-    'Total assets': s.totalAssets ?? 0,
-    'Total liabilities': s.totalLiab ?? 0,
-  }));
-
-  const cashAndInvestments = (latest.cash ?? 0) + (latest.shortTermInvestments ?? 0);
-  const prevCashAndInvestments = prev ? (prev.cash ?? 0) + (prev.shortTermInvestments ?? 0) : null;
-
-  const rows: Array<{ label: string; value: string; yoy: string | null }> = [
-    { label: 'Cash and short-term investments', value: formatValue(cashAndInvestments), yoy: formatPercent(cashAndInvestments, prevCashAndInvestments) },
-    { label: 'Total assets', value: formatValue(latest.totalAssets), yoy: formatPercent(latest.totalAssets, prev?.totalAssets) },
-    { label: 'Total liabilities', value: formatValue(latest.totalLiab), yoy: formatPercent(latest.totalLiab, prev?.totalLiab) },
-    { label: 'Total equity', value: formatValue(latest.totalStockholderEquity), yoy: formatPercent(latest.totalStockholderEquity, prev?.totalStockholderEquity) },
-  ];
 
   return (
     <CollapsibleSection title="Balance Sheet">
       <ViewToggle view={view} setView={setView} />
-      <FinancialBarChart data={chartData} bars={[{ key: 'Total assets', color: '#4285f4' }, { key: 'Total liabilities', color: '#fbbc04' }]} />
-      <FinancialTable
-        periodLabel={formatPeriodLabel(latest.endDate, view)}
-        rows={rows}
-      />
+      {!hasData ? (
+        <p style={{ color: 'var(--gf-text-tertiary)', fontSize: 14 }}>No data for this view</p>
+      ) : (() => {
+        const chartData = sorted.map((s) => ({
+          period: formatPeriodLabel(s.endDate, view),
+          'Total assets': s.totalAssets ?? 0,
+          'Total liabilities': s.totalLiab ?? 0,
+        }));
+        const cashAndInvestments = (latest.cash ?? 0) + (latest.shortTermInvestments ?? 0);
+        const prevCashAndInvestments = prev ? (prev.cash ?? 0) + (prev.shortTermInvestments ?? 0) : null;
+        const rows: Array<{ label: string; value: string; yoy: string | null }> = [
+          { label: 'Cash and short-term investments', value: formatValue(cashAndInvestments), yoy: formatPercent(cashAndInvestments, prevCashAndInvestments) },
+          { label: 'Total assets', value: formatValue(latest.totalAssets), yoy: formatPercent(latest.totalAssets, prev?.totalAssets) },
+          { label: 'Total liabilities', value: formatValue(latest.totalLiab), yoy: formatPercent(latest.totalLiab, prev?.totalLiab) },
+          { label: 'Total equity', value: formatValue(latest.totalStockholderEquity), yoy: formatPercent(latest.totalStockholderEquity, prev?.totalStockholderEquity) },
+        ];
+        return (
+          <>
+            <FinancialBarChart data={chartData} bars={[{ key: 'Total assets', color: '#4285f4' }, { key: 'Total liabilities', color: '#fbbc04' }]} />
+            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} />
+          </>
+        );
+      })()}
     </CollapsibleSection>
   );
 }
@@ -179,36 +185,39 @@ function CashFlowSection({ data }: { data: NonNullable<ReturnType<typeof useFund
   const rawA = data.cashflowStatementHistory?.cashflowStatements || [];
   const statements = view === 'quarterly' ? rawQ : rawA;
 
-  if (statements.length === 0) return null;
+  if (rawQ.length === 0 && rawA.length === 0) return null;
 
-  const sorted = [...statements].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+  const hasData = statements.length > 0;
+  const sorted = hasData ? [...statements].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) : [];
   const latest = sorted[sorted.length - 1];
   const prev = sorted.length >= 2 ? sorted[sorted.length - 2] : null;
-
-  const freeCashFlow = (latest.totalCashFromOperatingActivities ?? 0) + (latest.capitalExpenditures ?? 0);
-  const prevFCF = prev ? (prev.totalCashFromOperatingActivities ?? 0) + (prev.capitalExpenditures ?? 0) : null;
-
-  const chartData = sorted.map((s) => ({
-    period: formatPeriodLabel(s.endDate, view),
-    'Operating cash flow': s.totalCashFromOperatingActivities ?? 0,
-    'Capital expenditures': Math.abs(s.capitalExpenditures ?? 0),
-  }));
-
-  const rows: Array<{ label: string; value: string; yoy: string | null }> = [
-    { label: 'Operating cash flow', value: formatValue(latest.totalCashFromOperatingActivities), yoy: formatPercent(latest.totalCashFromOperatingActivities, prev?.totalCashFromOperatingActivities) },
-    { label: 'Capital expenditures', value: formatValue(latest.capitalExpenditures), yoy: formatPercent(latest.capitalExpenditures, prev?.capitalExpenditures) },
-    { label: 'Free cash flow', value: formatValue(freeCashFlow), yoy: formatPercent(freeCashFlow, prevFCF) },
-    { label: 'Financing cash flow', value: formatValue(latest.totalCashFromFinancingActivities), yoy: formatPercent(latest.totalCashFromFinancingActivities, prev?.totalCashFromFinancingActivities) },
-  ];
 
   return (
     <CollapsibleSection title="Cash Flow">
       <ViewToggle view={view} setView={setView} />
-      <FinancialBarChart data={chartData} bars={[{ key: 'Operating cash flow', color: '#4285f4' }, { key: 'Capital expenditures', color: '#fbbc04' }]} />
-      <FinancialTable
-        periodLabel={formatPeriodLabel(latest.endDate, view)}
-        rows={rows}
-      />
+      {!hasData ? (
+        <p style={{ color: 'var(--gf-text-tertiary)', fontSize: 14 }}>No data for this view</p>
+      ) : (() => {
+        const freeCashFlow = (latest.totalCashFromOperatingActivities ?? 0) + (latest.capitalExpenditures ?? 0);
+        const prevFCF = prev ? (prev.totalCashFromOperatingActivities ?? 0) + (prev.capitalExpenditures ?? 0) : null;
+        const chartData = sorted.map((s) => ({
+          period: formatPeriodLabel(s.endDate, view),
+          'Operating cash flow': s.totalCashFromOperatingActivities ?? 0,
+          'Capital expenditures': Math.abs(s.capitalExpenditures ?? 0),
+        }));
+        const rows: Array<{ label: string; value: string; yoy: string | null }> = [
+          { label: 'Operating cash flow', value: formatValue(latest.totalCashFromOperatingActivities), yoy: formatPercent(latest.totalCashFromOperatingActivities, prev?.totalCashFromOperatingActivities) },
+          { label: 'Capital expenditures', value: formatValue(latest.capitalExpenditures), yoy: formatPercent(latest.capitalExpenditures, prev?.capitalExpenditures) },
+          { label: 'Free cash flow', value: formatValue(freeCashFlow), yoy: formatPercent(freeCashFlow, prevFCF) },
+          { label: 'Financing cash flow', value: formatValue(latest.totalCashFromFinancingActivities), yoy: formatPercent(latest.totalCashFromFinancingActivities, prev?.totalCashFromFinancingActivities) },
+        ];
+        return (
+          <>
+            <FinancialBarChart data={chartData} bars={[{ key: 'Operating cash flow', color: '#4285f4' }, { key: 'Capital expenditures', color: '#fbbc04' }]} />
+            <FinancialTable periodLabel={formatPeriodLabel(latest.endDate, view)} rows={rows} />
+          </>
+        );
+      })()}
     </CollapsibleSection>
   );
 }
