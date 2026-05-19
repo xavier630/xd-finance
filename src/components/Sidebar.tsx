@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom';
-import { watchlists, stocks } from '../data/mockData';
+import { stocks } from '../data/mockData';
 import { getCurrencySymbol } from '../utils/currency';
+import { useWatchlists } from '../context/WatchlistContext';
 
 export default function Sidebar() {
+  const { watchlists } = useWatchlists();
   const mainWatchlist = watchlists[0];
 
   return (
     <aside className="gf-sidebar">
       <div className="gf-sidebar-section">
         <div className="gf-sidebar-title">Watchlist</div>
-        {mainWatchlist.items.slice(0, 8).map((item) => (
+        {mainWatchlist?.items.slice(0, 8).map((item) => (
           <Link key={item.symbol} to={`/quote/${item.symbol}`} className="gf-sidebar-stock">
             <div>
               <div className="gf-sidebar-stock-symbol">{item.symbol}</div>
