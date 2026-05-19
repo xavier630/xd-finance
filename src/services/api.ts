@@ -24,6 +24,7 @@ export interface YahooQuote {
   marketCap?: number;
   trailingPE?: number;
   trailingEps?: number;
+  epsTrailingTwelveMonths?: number;
   dividendYield?: number;
   fiftyTwoWeekHigh: number;
   fiftyTwoWeekLow: number;
