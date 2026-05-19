@@ -115,7 +115,7 @@ function IncomeStatementSection({ data }: { data: NonNullable<ReturnType<typeof 
     { label: 'Revenue', value: formatValue(latest.totalRevenue), yoy: formatPercent(latest.totalRevenue, prev?.totalRevenue) },
     { label: 'Operating expense', value: formatValue(opExpense), yoy: formatPercent(opExpense, prev ? (prev.totalRevenue ?? 0) - (prev.operatingIncome ?? 0) : null) },
     { label: 'Net income', value: formatValue(latest.netIncome), yoy: formatPercent(latest.netIncome, prev?.netIncome) },
-    { label: 'Net profit margin', value: `${margin.toFixed(2)}`, yoy: prev?.totalRevenue ? formatPercent(margin, (prev.netIncome ?? 0) / prev.totalRevenue * 100) : null },
+    { label: 'Net profit margin', value: `${margin.toFixed(2)}%`, yoy: prev?.totalRevenue ? formatPercent(margin, (prev.netIncome ?? 0) / prev.totalRevenue * 100) : null },
     { label: 'EBITDA', value: formatValue(latest.ebit ?? latest.operatingIncome), yoy: formatPercent(latest.ebit ?? latest.operatingIncome, prev?.ebit ?? prev?.operatingIncome) },
   ];
 
@@ -154,7 +154,7 @@ function BalanceSheetSection({ data }: { data: NonNullable<ReturnType<typeof use
   const prevCashAndInvestments = prev ? (prev.cash ?? 0) + (prev.shortTermInvestments ?? 0) : null;
 
   const rows: Array<{ label: string; value: string; yoy: string | null }> = [
-    { label: 'Cash and short-term investments', value: formatValue(cashAndInvestments || null), yoy: formatPercent(cashAndInvestments || null, prevCashAndInvestments) },
+    { label: 'Cash and short-term investments', value: formatValue(cashAndInvestments), yoy: formatPercent(cashAndInvestments, prevCashAndInvestments) },
     { label: 'Total assets', value: formatValue(latest.totalAssets), yoy: formatPercent(latest.totalAssets, prev?.totalAssets) },
     { label: 'Total liabilities', value: formatValue(latest.totalLiab), yoy: formatPercent(latest.totalLiab, prev?.totalLiab) },
     { label: 'Total equity', value: formatValue(latest.totalStockholderEquity), yoy: formatPercent(latest.totalStockholderEquity, prev?.totalStockholderEquity) },
