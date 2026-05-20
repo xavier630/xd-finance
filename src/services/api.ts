@@ -28,6 +28,7 @@ export interface YahooQuote {
   dividendYield?: number;
   fiftyTwoWeekHigh: number;
   fiftyTwoWeekLow: number;
+  fiftyTwoWeekChangePercent?: number;
   currency?: string;
   exchange: string;
   fullExchangeName?: string;

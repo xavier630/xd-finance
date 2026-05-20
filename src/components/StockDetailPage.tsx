@@ -120,15 +120,15 @@ export default function StockDetailPage() {
             {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
             {stock.changePercent.toFixed(2)}%)
           </span>
+          <a
+            href={getGoogleFinanceUrl(stock.symbol, stock.exchange)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="gf-btn-google-finance"
+          >
+            View on Google Finance
+          </a>
           <div className="gf-watchlist-btn-container">
-            <a
-              href={getGoogleFinanceUrl(stock.symbol, stock.exchange)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="gf-btn-google-finance"
-            >
-              View on Google Finance
-            </a>
             <button
               className={`gf-btn-watchlist ${isWatched ? 'watched' : ''}`}
               onClick={() => setShowWatchlistMenu(!showWatchlistMenu)}
