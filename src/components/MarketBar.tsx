@@ -6,7 +6,7 @@ const INDEX_NAMES: Record<string, string> = {
   '^DJI': 'Dow Jones',
   '^GSPC': 'S&P 500',
   '^IXIC': 'Nasdaq',
-  '^RUT': 'Russell 2000',
+  '^RUT': 'Russell',
   '^VIX': 'VIX',
 };
 
@@ -26,9 +26,7 @@ export default function MarketBar() {
         }));
         setIndices(mapped);
       })
-      .catch(() => {
-        // API unavailable
-      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,21 +40,28 @@ export default function MarketBar() {
 
   return (
     <div className="gf-market-bar">
-      {indices.map((index) => (
-        <div key={index.symbol} className="gf-market-item">
-          <div className="gf-market-item-name">{index.name}</div>
-          <div className="gf-market-item-value">
-            {index.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+      {indices.map((index) => {
+        const isPositive = index.change >= 0;
+        return (
+          <div key={index.symbol} className={`gf-market-chip ${isPositive ? 'positive' : 'negative'}`}>
+            <span className="gf-market-chip-arrow">{isPositive ? '\u2191' : '\u2193'}</span>
+            <div className="gf-market-chip-info">
+              <span className="gf-market-chip-name">{index.name}</span>
+              <span className="gf-market-chip-value">
+                {index.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div className="gf-market-chip-change">
+              <span className={isPositive ? 'gf-positive' : 'gf-negative'}>
+                {isPositive ? '+' : ''}{index.changePercent.toFixed(3)}%
+              </span>
+              <span className={isPositive ? 'gf-positive' : 'gf-negative'}>
+                {isPositive ? '+' : ''}{index.change.toFixed(2)}
+              </span>
+            </div>
           </div>
-          <div
-            className={`gf-market-item-change ${index.change >= 0 ? 'gf-positive' : 'gf-negative'}`}
-          >
-            {index.change >= 0 ? '+' : ''}
-            {index.change.toFixed(2)} ({index.change >= 0 ? '+' : ''}
-            {index.changePercent.toFixed(2)}%)
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
