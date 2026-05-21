@@ -5,10 +5,12 @@ import WatchlistPage from './components/WatchlistPage';
 import StockDetailPage from './components/StockDetailPage';
 import { WatchlistProvider } from './context/WatchlistContext';
 
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+
 export default function App() {
   return (
     <WatchlistProvider>
-    <Router>
+    <Router basename={basename}>
       <div>
         <Header />
         <div className="gf-market-nav">
