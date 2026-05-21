@@ -9,7 +9,13 @@ const yahooFinance = new YahooFinance();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://xavier630.github.io',
+  ],
+}));
 app.use(express.json());
 
 // Simple in-memory cache
