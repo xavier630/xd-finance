@@ -27,8 +27,28 @@ function getTickerColor(symbol: string): string {
   return TICKER_COLORS[Math.abs(hash) % TICKER_COLORS.length];
 }
 
+function SyncIndicator({ status, lastSynced }: { status: string; lastSynced: Date | null }) {
+  if (status === 'disabled') return null;
+
+  const label =
+    status === 'syncing' ? 'Syncing...' :
+    status === 'synced' ? `Synced${lastSynced ? ` ${lastSynced.toLocaleTimeString()}` : ''}` :
+    status === 'error' ? 'Sync error' : '';
+
+  const color =
+    status === 'synced' ? '#0d904f' :
+    status === 'error' ? '#d93025' : '#5f6368';
+
+  return (
+    <span className="gf-sync-indicator" style={{ color, fontSize: '12px', marginLeft: '12px' }}>
+      {status === 'syncing' && <span className="gf-sync-spinner" />}
+      {label}
+    </span>
+  );
+}
+
 export default function WatchlistPage() {
-  const { watchlists, removeStock, createWatchlist, deleteWatchlist, renameWatchlist } = useWatchlists();
+  const { watchlists, removeStock, createWatchlist, deleteWatchlist, renameWatchlist, syncStatus, lastSynced } = useWatchlists();
   const [activeTab, setActiveTab] = useState(watchlists[0]?.id || '');
   const [showNewWatchlist, setShowNewWatchlist] = useState(false);
   const [newWatchlistName, setNewWatchlistName] = useState('');
@@ -151,7 +171,10 @@ export default function WatchlistPage() {
       )}
 
       <div className="gf-classic-wl-header">
-        <h2 className="gf-classic-wl-title">{activeWatchlist?.name || 'Watchlist'}</h2>
+        <h2 className="gf-classic-wl-title">
+          {activeWatchlist?.name || 'Watchlist'}
+          <SyncIndicator status={syncStatus} lastSynced={lastSynced} />
+        </h2>
         <div className="gf-classic-wl-actions">
           {activeWatchlist && (
             <>

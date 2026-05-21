@@ -234,6 +234,42 @@ export async function getEarningsHistory(symbol: string): Promise<AlphaVantageEa
   );
 }
 
+// ---------- Gist sync ----------
+
+export interface GistStatus {
+  configured: boolean;
+  gistId: string | null;
+}
+
+export interface GistLoadResult {
+  watchlists: unknown[] | null;
+  gistId: string | null;
+}
+
+export interface GistSaveResult {
+  gistId: string;
+  created?: boolean;
+  updated?: boolean;
+}
+
+export async function getGistStatus(): Promise<GistStatus> {
+  return fetchJson<GistStatus>(`${API_BASE}/api/gist/status`);
+}
+
+export async function loadGistWatchlists(): Promise<GistLoadResult> {
+  return fetchJson<GistLoadResult>(`${API_BASE}/api/gist/load`);
+}
+
+export async function saveGistWatchlists(watchlists: unknown[]): Promise<GistSaveResult> {
+  const res = await fetch(`${API_BASE}/api/gist/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ watchlists }),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json() as Promise<GistSaveResult>;
+}
+
 // ---------- Timeframe helpers ----------
 
 export function getChartParams(timeframe: string): { period1: string; period2: string; interval: string } {
