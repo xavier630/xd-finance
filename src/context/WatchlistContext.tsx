@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Watchlist, WatchlistItem } from '../types';
 import {
@@ -10,6 +10,9 @@ import {
   deleteWatchlist as deleteWl,
   renameWatchlist as renameWl,
 } from '../services/watchlistStorage';
+import { loadGistWatchlists, saveGistWatchlists, getGistStatus } from '../services/api';
+
+type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error' | 'disabled';
 
 interface WatchlistContextValue {
   watchlists: Watchlist[];
@@ -20,15 +23,83 @@ interface WatchlistContextValue {
   renameWatchlist: (watchlistId: string, newName: string) => void;
   isInWatchlist: (watchlistId: string, symbol: string) => boolean;
   getWatchlistsForSymbol: (symbol: string) => string[];
+  syncStatus: SyncStatus;
+  lastSynced: Date | null;
 }
 
 const WatchlistContext = createContext<WatchlistContextValue | null>(null);
 
+const GIST_DEBOUNCE_MS = 2000;
+
 export function WatchlistProvider({ children }: { children: ReactNode }) {
   const [watchlists, setWatchlists] = useState<Watchlist[]>(() => loadWatchlists());
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+  const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  const gistEnabled = useRef(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initialLoadDone = useRef(false);
 
+  // Check if Gist sync is available and load remote data on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        const status = await getGistStatus();
+        if (cancelled) return;
+
+        if (!status.configured) {
+          setSyncStatus('disabled');
+          return;
+        }
+
+        gistEnabled.current = true;
+        setSyncStatus('syncing');
+
+        const result = await loadGistWatchlists();
+        if (cancelled) return;
+
+        if (result.watchlists && Array.isArray(result.watchlists) && result.watchlists.length > 0) {
+          setWatchlists(result.watchlists as Watchlist[]);
+          saveWatchlists(result.watchlists as Watchlist[]);
+        }
+
+        setSyncStatus('synced');
+        setLastSynced(new Date());
+        initialLoadDone.current = true;
+      } catch {
+        if (!cancelled) setSyncStatus('error');
+      }
+    }
+
+    init();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Save to localStorage + debounced Gist save on every change
   useEffect(() => {
     saveWatchlists(watchlists);
+
+    if (!gistEnabled.current) return;
+    // Skip the initial render to avoid saving defaults back before Gist loads
+    if (!initialLoadDone.current) return;
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+    debounceTimer.current = setTimeout(async () => {
+      setSyncStatus('syncing');
+      try {
+        await saveGistWatchlists(watchlists);
+        setSyncStatus('synced');
+        setLastSynced(new Date());
+      } catch {
+        setSyncStatus('error');
+      }
+    }, GIST_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
   }, [watchlists]);
 
   const addStock = useCallback((watchlistId: string, item: WatchlistItem) => {
@@ -79,6 +150,8 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
         renameWatchlist,
         isInWatchlist,
         getWatchlistsForSymbol,
+        syncStatus,
+        lastSynced,
       }}
     >
       {children}

@@ -1160,6 +1160,29 @@ a:hover {
   font-size: 14px;
 }
 
+/* Gist sync indicator */
+.gf-sync-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.gf-sync-spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #dadce0;
+  border-top-color: #1a73e8;
+  border-radius: 50%;
+  animation: gf-spin 0.8s linear infinite;
+}
+
+@keyframes gf-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ==========================================
    CLASSIC MODE STYLES
    ========================================== */

@@ -2,8 +2,23 @@ import type { Watchlist, WatchlistItem } from '../types';
 
 const STORAGE_KEY = 'xd-finance-watchlists';
 
-const EMPTY_DEFAULT: Watchlist[] = [
-  { id: 'main', name: 'My Watchlist', items: [] },
+const DEFAULT_ITEMS: WatchlistItem[] = [
+  { symbol: 'GOOGL', name: 'Alphabet Inc Class A', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'AAPL', name: 'Apple Inc', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'MSFT', name: 'Microsoft Corp', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'NVDA', name: 'NVIDIA Corp', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'META', name: 'Meta Platforms Inc', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'TSLA', name: 'Tesla Inc', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'JPM', name: 'JPMorgan Chase & Co', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'JNJ', name: 'Johnson & Johnson', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+  { symbol: 'V', name: 'Visa Inc', price: 0, change: 0, changePercent: 0, marketCap: 0, volume: 0, sparklineData: [], currency: 'USD' },
+];
+
+const DEFAULT_WATCHLISTS: Watchlist[] = [
+  { id: 'main', name: 'My Watchlist', items: DEFAULT_ITEMS },
+  { id: 'tech', name: 'Tech Giants', items: DEFAULT_ITEMS.filter(i => ['GOOGL', 'AAPL', 'MSFT', 'NVDA', 'META'].includes(i.symbol)) },
+  { id: 'intl', name: 'International', items: [] },
 ];
 
 export function loadWatchlists(): Watchlist[] {
@@ -16,7 +31,7 @@ export function loadWatchlists(): Watchlist[] {
   } catch {
     // fall through to defaults
   }
-  return structuredClone(EMPTY_DEFAULT);
+  return structuredClone(DEFAULT_WATCHLISTS);
 }
 
 export function saveWatchlists(watchlists: Watchlist[]): void {

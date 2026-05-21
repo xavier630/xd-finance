@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import YahooFinance from 'yahoo-finance2';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 const yahooFinance = new YahooFinance();
 
@@ -223,6 +225,123 @@ app.get('/api/market-indices', async (_req, res) => {
   }
 });
 
+// ---------- GitHub Gist watchlist sync ----------
+
+const GIST_PAT = process.env.GITHUB_GIST_PAT;
+const GIST_FILENAME = 'xd-finance-watchlists.json';
+const GIST_DESCRIPTION = 'XD Finance Watchlist Data (auto-synced)';
+
+const GIST_STATE_PATH = join(import.meta.dirname, '.gist-state.json');
+
+function loadGistId(): string | null {
+  try {
+    if (existsSync(GIST_STATE_PATH)) {
+      const state = JSON.parse(readFileSync(GIST_STATE_PATH, 'utf-8'));
+      return state.gistId || null;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+function saveGistId(gistId: string): void {
+  writeFileSync(GIST_STATE_PATH, JSON.stringify({ gistId }));
+}
+
+// GET /api/gist/status — check if Gist sync is configured
+app.get('/api/gist/status', (_req, res) => {
+  res.json({
+    configured: !!GIST_PAT,
+    gistId: loadGistId(),
+  });
+});
+
+// GET /api/gist/load — fetch watchlists from Gist
+app.get('/api/gist/load', async (_req, res) => {
+  if (!GIST_PAT) return res.status(503).json({ error: 'GITHUB_GIST_PAT not configured' });
+
+  const gistId = loadGistId();
+  if (!gistId) return res.json({ watchlists: null, gistId: null });
+
+  try {
+    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+      headers: {
+        Authorization: `Bearer ${GIST_PAT}`,
+        Accept: 'application/vnd.github+json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) return res.json({ watchlists: null, gistId: null });
+      throw new Error(`GitHub API: ${response.status}`);
+    }
+
+    const gist = await response.json() as { files: Record<string, { content: string }> };
+    const file = gist.files[GIST_FILENAME];
+    if (!file) return res.json({ watchlists: null, gistId });
+
+    const watchlists = JSON.parse(file.content);
+    res.json({ watchlists, gistId });
+  } catch (err) {
+    console.error('Gist load error:', err);
+    res.status(500).json({ error: 'Failed to load from Gist' });
+  }
+});
+
+// POST /api/gist/save — save watchlists to Gist (create or update)
+app.post('/api/gist/save', async (req, res) => {
+  if (!GIST_PAT) return res.status(503).json({ error: 'GITHUB_GIST_PAT not configured' });
+
+  const { watchlists } = req.body;
+  if (!watchlists) return res.status(400).json({ error: 'No watchlists provided' });
+
+  const content = JSON.stringify(watchlists, null, 2);
+  const gistId = loadGistId();
+
+  try {
+    if (gistId) {
+      // Update existing Gist
+      const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${GIST_PAT}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          files: { [GIST_FILENAME]: { content } },
+        }),
+      });
+
+      if (!response.ok) throw new Error(`GitHub API: ${response.status}`);
+      res.json({ gistId, updated: true });
+    } else {
+      // Create new Gist
+      const response = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${GIST_PAT}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: GIST_DESCRIPTION,
+          public: false,
+          files: { [GIST_FILENAME]: { content } },
+        }),
+      });
+
+      if (!response.ok) throw new Error(`GitHub API: ${response.status}`);
+      const gist = await response.json() as { id: string };
+      saveGistId(gist.id);
+      res.json({ gistId: gist.id, created: true });
+    }
+  } catch (err) {
+    console.error('Gist save error:', err);
+    res.status(500).json({ error: 'Failed to save to Gist' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Yahoo Finance proxy running on http://localhost:${PORT}`);
+  console.log(`Gist sync: ${GIST_PAT ? 'enabled' : 'disabled (set GITHUB_GIST_PAT)'}`);
 });
