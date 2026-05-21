@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { getChartData } from '../data/mockData';
+import { useChartData } from '../hooks/useStockData';
 import { getCurrencySymbol } from '../utils/currency';
 import type { ChartTimeframe, CurrencyCode } from '../types';
 
@@ -23,7 +23,7 @@ interface StockChartProps {
 
 export default function StockChart({ symbol, currentPrice, change, currency }: StockChartProps) {
   const [activeTimeframe, setActiveTimeframe] = useState<ChartTimeframe>('1Y');
-  const data = getChartData(symbol, activeTimeframe);
+  const { data, loading } = useChartData(symbol, activeTimeframe);
   const isPositive = change >= 0;
   const color = isPositive ? '#0d904f' : '#d93025';
   const fillColor = isPositive ? '#e6f4ea' : '#fce8e6';
@@ -50,6 +50,7 @@ export default function StockChart({ symbol, currentPrice, change, currency }: S
       <div className="gf-chart-header">
         <div style={{ fontSize: 13, color: 'var(--gf-text-secondary)' }}>
           {symbol} &middot; {activeTimeframe}
+          {loading && <span style={{ marginLeft: 8, fontSize: 11 }}>Loading...</span>}
         </div>
         <div className="gf-chart-timeframes">
           {timeframes.map((tf) => (

@@ -1,101 +1,251 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { watchlists } from '../data/mockData';
-import { formatCurrencyValue, getCurrencySymbol } from '../utils/currency';
-import Sparkline from './Sparkline';
+import { useWatchlists } from '../context/WatchlistContext';
+import { getCurrencySymbol } from '../utils/currency';
+import { getQuotes } from '../services/api';
+import type { YahooQuote } from '../services/api';
 import type { CurrencyCode } from '../types';
 
-function formatMarketCap(value: number, currency: CurrencyCode): string {
-  return formatCurrencyValue(value, currency, { compact: true });
+interface LiveStockData {
+  price: number;
+  change: number;
+  changePercent: number;
+  fiftyTwoWeekChangePercent: number | null;
+  currency: CurrencyCode;
 }
 
-function formatVolume(value: number): string {
-  if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `${(value / 1e6).toFixed(2)}M`;
-  if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`;
-  return value.toLocaleString();
+const TICKER_COLORS: string[] = [
+  '#1a73e8', '#d93025', '#0d904f', '#e37400', '#9334e6',
+  '#00897b', '#c2185b', '#6d4c41', '#546e7a', '#f4511e',
+];
+
+function getTickerColor(symbol: string): string {
+  let hash = 0;
+  for (let i = 0; i < symbol.length; i++) {
+    hash = symbol.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return TICKER_COLORS[Math.abs(hash) % TICKER_COLORS.length];
+}
+
+function SyncIndicator({ status, lastSynced }: { status: string; lastSynced: Date | null }) {
+  if (status === 'disabled') return null;
+
+  const label =
+    status === 'syncing' ? 'Syncing...' :
+    status === 'synced' ? `Synced${lastSynced ? ` ${lastSynced.toLocaleTimeString()}` : ''}` :
+    status === 'error' ? 'Sync error' : '';
+
+  const color =
+    status === 'synced' ? '#0d904f' :
+    status === 'error' ? '#d93025' : '#5f6368';
+
+  return (
+    <span className="gf-sync-indicator" style={{ color, fontSize: '12px', marginLeft: '12px' }}>
+      {status === 'syncing' && <span className="gf-sync-spinner" />}
+      {label}
+    </span>
+  );
 }
 
 export default function WatchlistPage() {
-  const [activeTab, setActiveTab] = useState(watchlists[0].id);
+  const { watchlists, removeStock, createWatchlist, deleteWatchlist, renameWatchlist, syncStatus, lastSynced } = useWatchlists();
+  const [activeTab, setActiveTab] = useState(watchlists[0]?.id || '');
+  const [showNewWatchlist, setShowNewWatchlist] = useState(false);
+  const [newWatchlistName, setNewWatchlistName] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [liveData, setLiveData] = useState<Record<string, LiveStockData>>({});
+  const [liveLoading, setLiveLoading] = useState(false);
   const navigate = useNavigate();
 
   const activeWatchlist = watchlists.find((w) => w.id === activeTab) || watchlists[0];
+  const symbolsKey = activeWatchlist?.items.map((i) => i.symbol).join(',') ?? '';
+
+  useEffect(() => {
+    const symbols = activeWatchlist?.items.map((i) => i.symbol) || [];
+    if (symbols.length === 0) { setLiveLoading(false); return; }
+
+    let cancelled = false;
+    setLiveLoading(true);
+    getQuotes(symbols)
+      .then((data) => {
+        if (cancelled) return;
+        const live: Record<string, LiveStockData> = {};
+        for (const sym of symbols) {
+          const q = data[sym] as YahooQuote | undefined;
+          if (q) {
+            live[sym] = {
+              price: q.regularMarketPrice,
+              change: q.regularMarketChange,
+              changePercent: q.regularMarketChangePercent,
+              fiftyTwoWeekChangePercent: q.fiftyTwoWeekChangePercent ?? null,
+              currency: (q.currency || 'USD') as CurrencyCode,
+            };
+          }
+        }
+        setLiveData(live);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLiveLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [activeWatchlist?.id, symbolsKey]);
+
+  function handleCreateWatchlist() {
+    if (newWatchlistName.trim()) {
+      createWatchlist(newWatchlistName.trim());
+      setNewWatchlistName('');
+      setShowNewWatchlist(false);
+    }
+  }
+
+  function handleRename(watchlistId: string) {
+    if (editingName.trim()) {
+      renameWatchlist(watchlistId, editingName.trim());
+    }
+    setEditingId(null);
+  }
+
+  function handleDeleteWatchlist(watchlistId: string) {
+    deleteWatchlist(watchlistId);
+    if (activeTab === watchlistId) {
+      const remaining = watchlists.filter((wl) => wl.id !== watchlistId);
+      setActiveTab(remaining[0]?.id || '');
+    }
+  }
 
   return (
     <div>
-      <div className="gf-watchlist-header">
-        <h1 className="gf-watchlist-title">{activeWatchlist.name}</h1>
+      <div className="gf-breadcrumb">
+        <span>HOME</span>
+        <span>&rsaquo;</span>
+        <span className="active">Watchlists</span>
       </div>
 
-      <div className="gf-watchlist-tabs">
+      <div className="gf-classic-wl-tabs">
         {watchlists.map((wl) => (
           <button
             key={wl.id}
-            className={`gf-watchlist-tab ${activeTab === wl.id ? 'active' : ''}`}
+            className={`gf-classic-wl-tab ${activeTab === wl.id ? 'active' : ''}`}
             onClick={() => setActiveTab(wl.id)}
           >
+            <span className="gf-classic-wl-tab-icon">{'☰'}</span>
             {wl.name}
-            <span style={{ marginLeft: 6, fontSize: 12, color: 'var(--gf-text-tertiary)' }}>
-              ({wl.items.length})
-            </span>
+            <span className="gf-classic-wl-tab-count">{wl.items.length}</span>
           </button>
         ))}
+        <button className="gf-classic-wl-tab gf-classic-wl-tab-new" onClick={() => setShowNewWatchlist(true)}>
+          + New
+        </button>
       </div>
 
-      <table className="gf-watchlist-table">
-        <thead>
-          <tr>
-            <th style={{ width: '30%' }}>Symbol</th>
-            <th className="right">Price</th>
-            <th className="right">Change</th>
-            <th className="right">% Change</th>
-            <th className="right">Market Cap</th>
-            <th className="right">Volume</th>
-            <th className="right" style={{ width: '100px' }}>
-              30D Trend
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {activeWatchlist.items.map((item) => {
-            const sym = getCurrencySymbol(item.currency);
-            return (
-              <tr key={item.symbol} onClick={() => navigate(`/quote/${item.symbol}`)}>
-                <td>
-                  <div className="gf-stock-symbol">{item.symbol}</div>
-                  <div className="gf-stock-name">{item.name}</div>
-                </td>
-                <td className="right gf-price">
-                  {sym}
-                  {item.price.toFixed(2)}
-                </td>
-                <td className={`right ${item.change >= 0 ? 'gf-positive' : 'gf-negative'}`}>
-                  {item.change >= 0 ? '+' : ''}
-                  {item.change.toFixed(2)}
-                </td>
-                <td className="right">
-                  <span
-                    className={`gf-change-badge ${item.changePercent >= 0 ? 'positive' : 'negative'}`}
-                  >
-                    {item.changePercent >= 0 ? '+' : ''}
-                    {item.changePercent.toFixed(2)}%
-                  </span>
-                </td>
-                <td className="right" style={{ color: 'var(--gf-text-secondary)' }}>
-                  {formatMarketCap(item.marketCap, item.currency)}
-                </td>
-                <td className="right" style={{ color: 'var(--gf-text-secondary)' }}>
-                  {formatVolume(item.volume)}
-                </td>
-                <td className="right">
-                  <Sparkline data={item.sparklineData} />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {editingId && (
+        <div className="gf-inline-form">
+          <input
+            type="text"
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleRename(editingId)}
+            autoFocus
+            className="gf-input"
+          />
+          <button className="gf-btn-primary" onClick={() => handleRename(editingId)}>Save</button>
+          <button className="gf-btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
+        </div>
+      )}
+
+      {showNewWatchlist && (
+        <div className="gf-inline-form">
+          <input
+            type="text"
+            value={newWatchlistName}
+            onChange={(e) => setNewWatchlistName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateWatchlist()}
+            placeholder="Watchlist name"
+            autoFocus
+            className="gf-input"
+          />
+          <button className="gf-btn-primary" onClick={handleCreateWatchlist}>Create</button>
+          <button className="gf-btn-secondary" onClick={() => setShowNewWatchlist(false)}>Cancel</button>
+        </div>
+      )}
+
+      <div className="gf-classic-wl-header">
+        <h2 className="gf-classic-wl-title">
+          {activeWatchlist?.name || 'Watchlist'}
+          <SyncIndicator status={syncStatus} lastSynced={lastSynced} />
+        </h2>
+        <div className="gf-classic-wl-actions">
+          {activeWatchlist && (
+            <>
+              <button
+                className="gf-btn-secondary"
+                onClick={() => {
+                  setEditingId(activeWatchlist.id);
+                  setEditingName(activeWatchlist.name);
+                }}
+              >
+                Rename
+              </button>
+              {watchlists.length > 1 && (
+                <button className="gf-btn-danger" onClick={() => handleDeleteWatchlist(activeWatchlist.id)}>
+                  Delete
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {liveLoading && <div className="gf-loading" style={{ padding: '8px 0' }}>Loading live prices...</div>}
+
+      <div className="gf-classic-wl-list">
+        {activeWatchlist?.items.map((item) => {
+          const live = liveData[item.symbol];
+          const price = live?.price ?? item.price;
+          const change = live?.change ?? item.change;
+          const changePercent = live?.changePercent ?? item.changePercent;
+          const currency = live?.currency ?? item.currency;
+          const sym = getCurrencySymbol(currency);
+          const isPositive = change >= 0;
+          const isNegative = change < 0;
+
+          return (
+            <div
+              key={item.symbol}
+              className="gf-classic-wl-row"
+              onClick={() => navigate(`/quote/${item.symbol}`)}
+            >
+              <span className="gf-ticker-badge" style={{ backgroundColor: getTickerColor(item.symbol) }}>
+                {item.symbol}
+              </span>
+              <span className="gf-classic-wl-name">{item.name}</span>
+              <span className="gf-classic-wl-price">{sym}{price.toFixed(2)}</span>
+              <span className={`gf-classic-wl-change ${isNegative ? 'negative' : ''}`}>
+                {isPositive ? '+' : '-'}{sym}{Math.abs(change).toFixed(2)}
+              </span>
+              <span className={`gf-classic-wl-pct ${isPositive ? 'positive' : isNegative ? 'negative' : ''}`}>
+                {isPositive ? '\u2191' : isNegative ? '\u2193' : ''} {Math.abs(changePercent).toFixed(2)}%
+              </span>
+              <button
+                className="gf-btn-remove"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeStock(activeWatchlist.id, item.symbol);
+                }}
+                title="Remove from watchlist"
+              >
+                {'✕'}
+              </button>
+            </div>
+          );
+        })}
+        {activeWatchlist?.items.length === 0 && (
+          <div className="gf-classic-wl-empty">
+            No stocks in this watchlist. Search for stocks to add.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
